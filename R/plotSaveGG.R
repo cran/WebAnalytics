@@ -25,7 +25,7 @@ plotSaveGG <-function (thePlot, fileID, fileType = "jpg")
   }
   if(any(class(thePlot) == "ggplot"))
   {
-  	newFileNameString = paste0(configFilesDirectoryNameGet(), digest(fileID),".",fileType )
+  	newFileNameString = paste0(configFilesDirectoryNameGet(), digest::digest(fileID),".",fileType )
 	  ggsave(filename = newFileNameString, plot=thePlot, width=7,height=(7*2/3))
 	  return(newFileNameString)
   }

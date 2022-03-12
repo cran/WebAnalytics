@@ -17,6 +17,7 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 #
+
 logFileRead <-function(fileName, columnList=c("MSTimestamp", "clientip", "url", "httpcode", "elapsed"), logTimeZone = "", timeFormat = "") 
 {
 	columnDefinitions = data.frame(
@@ -80,14 +81,23 @@ logFileRead <-function(fileName, columnList=c("MSTimestamp", "clientip", "url", 
 			}
 		}
 	}
-	logRecs = withCallingHandlers(read.table(fileName, 
-	                              header=FALSE, 
-	                              quote="\"'", 
-	                              col.names = wkColumnList,
-										            colClasses = wkTypeList,
-										            na.strings="-",
-										            stringsAsFactors = TRUE), # more minimising the memory footprint
-										error=function(e)
+	# logRecs = withCallingHandlers(read.table(fileName, 
+	#                               header=FALSE, 
+	#                               quote="\"'", 
+	#                               col.names = wkColumnList,
+	# 									            colClasses = wkTypeList,
+	# 									            na.strings="-",
+	# 									            stringsAsFactors = TRUE), # more minimising the memory footprint
+	
+	logRecs = withCallingHandlers(as.data.frame(readr::read_delim(fileName,
+	                                                       delim = " ",
+	                                                       quote = "\"",
+										                       escape_backslash = TRUE,
+										                       col_names = FALSE,
+										                       col_types = wkTypeList,
+										                       na = c("-"),
+										                       comment = "#")),
+										                                          error=function(e)
 										{
 											message("")				
 											message("Error Trapped reading data file:")		
@@ -116,11 +126,16 @@ logFileRead <-function(fileName, columnList=c("MSTimestamp", "clientip", "url", 
 											stop(e)
 										}
 				)
-				
+			
+	names(logRecs) = wkColumnList
+	
+	#print(str(logRecs))	
+	
 	# ensure that all columns to be dropped are here, pick them up from the dataframe columns 
 	#   because the column names get modified from their original forms when they are applied to
 	#   the data frame
 	#
+	
 	ignores = append(ignores, grep( "ignore.*",names(logRecs), value=TRUE))
 	
 	# drop them asap to hold down the memory footprint 

@@ -18,36 +18,6 @@ License: \tab GPL 3\cr
 }
 The objective of the package is to extract the maximum value from web server log data and to use that information to identify problems and potential areas for remediation.  It enables you to easily read web server log files; generate histograms, scatter plots and tabular reports of response times, overall and per URL; to generate some diagnostic plots; and to generate a \LaTeX document that can then be formatted as a PDF.  The package supplies scripts and templates to do that document generation.  
 
-Some of the questions that the report answers are:
-\itemize{
-\item How many static, dynamic and monitoring requests are there in the logs?
-\item How much of total system processing time is accounted for by static, dynamic and monitoring requests?
-\item How much static, dynamic and monitoring data transfer is there?
-\item How many requests per hour are made and in what hours?
-\item What are the transactions with the highest 95th percentile response times?
-\item What are the transactions that account for the most aggregate wait time in the system?
-\item What is the clock time distribution of requests and response times for a URL?
-\item How many distinct groups of response times are there for a URL? 
-\item For the above, how have these metrics changed relative to a baseline set of log data?
-\item Does the system display scalability issues or bottlenecks? (comparisons of response times with data rate and request concurrency for combinations of static and dynamic requests)
-\item What is the request count and session count per server per hour?
-\item What is the distribution of session lengths measured by request count?
-\item How does the transaction mix in the log compare with the transaction mix in a baseline dataset and which transactions represent the top n percent of the workload?  Mainly useful for defining and adjusting load test workload transaction mixes.   
-}
-
-The package requires Apache or IIS log files to contain elapsed times in addition to timestamps, HTTP verbs, HTTP response codes and URLs. In Apache this is provided by the \code{\%d} or \code{\%D} format specifier in a log format specification  string.  In IIS the \code{time-taken} field must be added to the log format.  If supplied, the request and response sizes are also used by the report.  For WebSphere applications, adding the JSESSIONID cookie to the log enables server-level session statistics (the server ID is parsed out of the WebSphere JSESSIONID cookie value, if the JSESSIONID cookie is not of the format \code{serverID:sessionID} the server distribution will be represented by a single server. To get session-level information without the cookie being present, it might be possible to use the client IP (depending on the structure of the network), in which case, adding
-
-\preformatted{b$jsessionid = b$userip
-b$serverid = 1
-}
-
-to the \code{config.fix.data} function will provide some useful information.  
-
-
-To generate a sample report PDF you need \code{xelatex} installed.  Populate a work directory using \code{workingDirectoryPopulate()} and run the sample script and config file that are created in that directory using the command \code{. ./makeerpt.sh sample} to generate a sample PDF from the test data supplied as part of the package.  
-
-The easiest way to configure the report is by editing the sample config file, \code{\link{sample.config}}.  The log format is described in the config file as a list of column names corresponding with the log file format.  A utility \code{\link{logFileFieldsGetIIS}} is provided to read the list of column names from an IIS log file header.    
-
 The generated report provides the following:
 
 Response Time Overview
@@ -63,6 +33,16 @@ Response Time Overview
 \item Top Transactions by error rate
 }
 
+This overview addresses questions such as
+\itemize{
+\item How many static, dynamic and monitoring requests are there in the logs?
+\item How much of total system processing time is accounted for by static, dynamic and monitoring requests?
+\item How much static, dynamic and monitoring data transfer is there?
+\item How many requests per hour are made and in what hours?
+\item What are the transactions with the highest 95th percentile response times?
+\item What are the transactions that account for the most aggregate wait time in the system?
+}
+
 Transaction Data for each URL
 \itemize{
 \item response time percentiles
@@ -71,6 +51,21 @@ Transaction Data for each URL
 \item error rate by hour
 \item and variances over a baseline dataset (useful for comparing before and after release performance)
 }
+
+This addresses questions such as
+\itemize{
+\item What is the clock time distribution of requests and response times for a URL?
+\item How many distinct groups of response times are there for a URL? 
+\item For the above, how have these metrics changed relative to a baseline set of log data?
+}
+
+Browser Mix Percentages 
+\itemize{
+\item Browser family percentiles
+\item Browser family and version percentiles
+}
+
+These percentages are useful for identifying which browsers and versions need to be tested.  
 
 Diagnostic Charts
 \itemize{
@@ -81,12 +76,16 @@ Diagnostic Charts
 \item Static Content (successful requests) by outbound data rate
 } 
 
+These plots mostly adddress the scalability of the system.  
+
 Percentile Comparison of transaction mix with baseline reporting period 
 \itemize{
 \item Input Data stats
 \item Transaction Counts and percentages by URL 
 \item Transaction Waits and percentages by URL 
 }
+
+These are primarily used for callibrating test workloads to ensure that the transaction mix is similar to the production workload, or the planned workload.  
 
 Server and Session Analysis 
 \itemize{
@@ -95,9 +94,7 @@ Server and Session Analysis
 \item Unique Sessions by Hour
 }
 
-The package uses the CRAN package \CRANpkg{brew} to produce \LaTeX source and comes with its own \LaTeX document class which can be tailored as needed.  
-
-A function \code{\link{workingDirectoryPopulate}} is provided populate a working directory with a sample \R report file which can be edited as needed and all needed supporting files.  
+A function \code{\link{workingDirectoryPopulate}} is provided to populate a working directory with all needed supporting files and a sample \R report file which can be edited as needed.  
 
 \itemize{
 \item \code{sampleRfile.R} - sample report template
@@ -106,11 +103,24 @@ A function \code{\link{workingDirectoryPopulate}} is provided populate a working
 \item \code{makerpt.ps1} - PowerShell script to run the report and process the output with \code{xelatex}
 \item \code{makerpt.sh} - bash script to run the report and process the output with \code{xelatex} 
 \item WebAnalytics.cls - the report LaTeX class
-
 }
 
 Generally the supplied
 configuration file \code{\link{sample.config}} read by the report script is enough for most purposes.
+
+To generate a sample report PDF you need \code{xelatex} installed.  Run the sample script and config file that are created in that directory using the command \code{. ./makerpt.sh sample} or  \code{powershell -f makerpt.ps1 sample} to generate a sample PDF from the test data supplied as part of the package.  
+
+The easiest way to configure the report is by editing the sample config file, \code{\link{sample.config}}.  The log format is described in the config file as a list of column names corresponding with the log file format.  A utility \code{\link{logFileFieldsGetIIS}} is provided to read the list of column names from an IIS log file header.    
+
+The package requires Apache or IIS log files to contain elapsed times in addition to timestamps, HTTP verbs, HTTP response codes and URLs. In Apache the elapsed time is provided by the \code{\%d} or \code{\%D} format specifier in a log format specification  string.  In IIS the \code{time-taken} field must be added to the log format.  If supplied, the request and response sizes are also used by the report.  For WebSphere applications, adding the JSESSIONID cookie to the log enables server-level session statistics (the server ID is parsed out of the WebSphere JSESSIONID cookie value, if the JSESSIONID cookie is not of the format \code{serverID:sessionID} the server distribution will be represented by a single server. To get session-level information without the cookie being present, it might be possible to use the client IP (depending on the structure of the network), in which case, adding
+
+\preformatted{b$jsessionid = b$userip
+b$serverid = 1
+}
+
+to the \code{config.fix.data} function, in the sample configuration file, will provide some useful information.  
+
+The package uses the CRAN package \CRANpkg{brew} to produce \LaTeX source and comes with its own \LaTeX document class which can be tailored as needed.  
 
 The generated \LaTeX document has been tested with \code{xelatex} and is known not to work with plain LaTeX because of font issues.  
 

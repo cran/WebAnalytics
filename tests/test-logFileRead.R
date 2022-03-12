@@ -16,9 +16,9 @@ test_that("minimum columns",{
    expect_error(logFileRead("u_getIISFields5.log", columnList = fullVarList[-(4)]),"specified column set does not include all of the minimum required columns: url missing")
    expect_error(logFileRead("u_getIISFields5.log", columnList = fullVarList[-(11)]),"specified column set does not include all of the minimum required columns: httpcode missing")
    expect_error(logFileRead("u_getIISFields5.log", columnList = fullVarList[-(14)]),"specified column set does not include a duration: elapsedms, elaspedus, elapseds")
-   expect_error(logFileRead("u_getIISFields5.log", columnList = fullVarList[-(3)]),"more columns than column names")
-   expect_error(logFileRead("u_getIISFields5.log", columnList = fullVarList[-(8)]),"more columns than column names")
-   expect_error(logFileRead("u_getIISFields5.log", columnList = fullVarList[-(9)]),"more columns than column names")
+   expect_error(logFileRead("u_getIISFields5.log", columnList = fullVarList[-(3)]),"missing values are not allowed in subscripted assignments of data frames")
+   expect_error(logFileRead("u_getIISFields5.log", columnList = fullVarList[-(8)]),"missing values are not allowed in subscripted assignments of data frames")
+   expect_error(logFileRead("u_getIISFields5.log", columnList = fullVarList[-(9)]),"missing values are not allowed in subscripted assignments of data frames")
    tempVarList = fullVarList
    tempVarList[2] = "not a known variable"
    expect_error(logFileRead("u_getIISFields5.log", columnList = tempVarList),"column name \"not a known variable\" is neither a defined column name nor begins with the text 'ignore'")
@@ -30,5 +30,5 @@ test_that("dropping ignore columns",{
 })
   
 test_that("report different column counts",{
-  expect_error(any(grepl("ignore.*", names(logFileRead("u_getIISFields9.log", columnList = fullVarList)))))
+  expect_warning(any(grepl("ignore.*", names(logFileRead("u_getIISFields9.log", columnList = fullVarList)))))
 })

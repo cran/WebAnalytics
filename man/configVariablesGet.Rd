@@ -150,6 +150,36 @@ The name of the temp dir to be used for storage of generated graphics.
 \item Default Value: ./txdata/
 }
 }
+\item{\code{config.useragent.generateFrequencies}}{
+Generate the User Agent Frequency Section of the report.  Setting this to FALSE suppresses the report, which in any case is only produced if the current dataset contains user agent strings.   
+\itemize{
+\item Optional
+\item Default Value: TRUE
+}
+}
+\item{\code{config.useragent.minimumPercentage}}{
+The minimum percentage that a User Agent family or version must represent to be considered.   
+\itemize{
+\item Optional
+\item Default Value: 2
+}
+}
+\item{\code{config.useragent.maximumPercentile}}{
+The maximum cumulative percentile to report.  The last few percent is made up of very low frequency of occurrence 
+User agents that are not feasible (or in many cases possible) to test.  
+\itemize{
+\item Optional
+\item Default Value: 96
+}
+}
+\item{\code{config.useragent.discardOther}}{
+Discard browser family "Other" records.  These are typically monitoring or heartbeat sources whose frequencies distort 
+the percentile calculations.  
+\itemize{
+\item Optional
+\item Default Value: TRUE
+}
+}
 \item{\code{config.author}}{
 Name of the author of the report.  Displayed on the default first page and in the page footer.   
 \itemize{

@@ -1,5 +1,7 @@
 $nameStem=$Args[0]
 
+$rscriptExecutable = "C:\Program Files\R\R-4.1.2\bin\rscript.exe"
+
 $ErrorActionPreference='silentlycontinue'
 
 $f = get-item -path "$nameStem.config"
@@ -14,14 +16,15 @@ $brewFileName="brewdriver.$dateTime"
 $texFileNameStem = "$nameStem$dateTime"
 
 echo @"
-options(error=function(){traceback()})
-library(brew)
+options(error=function(){traceback();quit(save="no",status=10)})
 e = new.env()
 with(e,{reportParameterFileName="$nameStem.config"})
-a = brew(file="sampleRfile.R", output="$texFileNameStem.tex",envir=e)
+options(brew.extended.error = TRUE)
+options(show.error.messages = TRUE)
+a = brew::brew(file="sampleRfile.R", output="$texFileNameStem.tex",envir=e)
 if(exists("a")) {
 if(class(a) == "try-error"){
-	traceback()
+	traceback(0)
 	print(a)
 	quit(save="no",status=10)
 }
@@ -30,7 +33,14 @@ print("normal end of R code")
 quit(save="no",status=0)
 "@ | out-file $brewFileName -encoding ascii
 
-D:\"Program Files"\R\R-3.0.3\bin\rscript.exe $brewFileName
+$exeFound = Test-Path -Path $rscriptExecutable -PathType Leaf
+if($exeFound -eq $false)
+{
+  echo "Rscript executable not found at $rscriptExecutable"
+  exit
+}
+
+& $rscriptExecutable $brewFileName
 
 if ($LastExitCode -eq 0)
 {

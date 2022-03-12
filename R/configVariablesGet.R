@@ -1,5 +1,5 @@
 #
-# configVariablesLoad - read config variables from a config file, setting defaults as necessary
+# configVariablesGet - read config variables from a config file, setting defaults as necessary
 #
 #     Copyright (C) 2021  Greg Hunt <greg@firmansyah.com>
 #
@@ -26,7 +26,8 @@ configVariablesLoad<-function(fileName="report.config")
 	optionalNames = c("config.readBaseline", "config.baseline.dataDir", "config.baseline.dirNames", "config.baseline.columnList", "config.generateGraphForTimeOver", 
 						"config.generateServerSessionStats", "config.generatePercentileRankings", "config.fix.data", "config.fix.current.data", "config.fix.baseline.data",
 						"config.generateTransactionDetails", "config.generateDiagnosticPlots", "config.workdir", "config.author",
-						"config.securityclass")
+						"config.securityclass","config.useragent.generateFrequencies", "config.useragent.minimumPercentage", "config.useragent.maximumPercentile",
+						"config.useragent.discardOther")
 
 	fn = normalizePath(fileName)
 	configFileExists = file.exists(fn)
@@ -78,6 +79,22 @@ configVariablesLoad<-function(fileName="report.config")
 	if(!is.element("config.generateDiagnosticPlots", loadedNames))
 	{
 		assign("config.generateDiagnosticPlots", TRUE, envir = .configEnv)
+	}
+	if(!is.element("config.useragent.maximumPercentile", loadedNames))
+	{
+	  assign("config.useragent.maximumPercentile", 96, envir = .configEnv)
+	}
+	if(!is.element("config.useragent.generateFrequencies", loadedNames))
+	{
+	  assign("config.useragent.generateFrequencies", TRUE, envir = .configEnv)
+	}
+	if(!is.element("config.useragent.discardOther", loadedNames))
+	{
+	  assign("config.useragent.discardOther", TRUE, envir = .configEnv)
+	}
+	if(!is.element("config.useragent.minimumPercentage", loadedNames))
+	{
+	  assign("config.useragent.minimumPercentage", 2, envir = .configEnv)
 	}
 	if(!is.element("config.author", loadedNames))
 	{

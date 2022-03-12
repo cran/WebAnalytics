@@ -25,7 +25,7 @@ workingDirectoryPopulate <- function (directoryName=".")
 	}
 	
 	wkdir = configFilesDirectoryNameGet()
-	if(is_absolute_path(wkdir))
+	if(fs::is_absolute_path(wkdir))
 	{
     if(!file.exists(wkdir))
       dir.create(wkdir, recursive=TRUE)
@@ -47,11 +47,16 @@ workingDirectoryPopulate <- function (directoryName=".")
 			expandedName = paste0(thisFile,".",as.character(julian(Sys.Date())),as.character(timeLt$hour),as.character(timeLt$min),as.character(timeLt$sec))
 			if(!file.exists(expandedName))
 			{
-			  if(!all.equal(readBin(file(thisFile),"raw"), readBin(file(system.file("templates", n, package=packageName(),mustWork=TRUE)),"raw")))
+			  targetFile = file(thisFile, open="rb")
+			  sourceFile = file(system.file("templates", n, package=packageName(),mustWork=TRUE),open="rb")
+			  
+			  if(!all.equal(readBin(targetFile,"raw"), readBin(sourceFile,"raw")))
 			  {
 			    file.copy(thisFile,expandedName,overwrite=TRUE)
 			    warning("existing file ", thisFile, " saved as ", expandedName)
 			  }
+			  close(sourceFile)
+			  close(targetFile)
 			}
 			else
 			{

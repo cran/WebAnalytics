@@ -34,18 +34,24 @@ plotByRate<-function(timecol, datacol, baseratecol, percentile, breaksString, ba
 		variancedf = aggregate(overalldf[,"data"] - baseline, by=list(tens,overalldf$type), FUN=function(a) {return(quantile(a,c(pctile),type=1,na.rm=TRUE)) } )
 		ratedf = aggregate(overalldf[,"data"],by=list(tens,overalldf$type),FUN=sum) 
 #		???????????????????? filter by type after aggregation to get intervals to match 
-		d = merge(variancedf[variancedf$Group.2 == "dataofinterest",], ratedf[ratedf$Group.2 == "background",], by="Group.1")
+		d = merge(variancedf[which(variancedf$Group.2 == "dataofinterest"),], ratedf[which(ratedf$Group.2 == "background"),], by="Group.1")
 		d2 = d[,c(1,3,5)]
 		names(d2) = c("time", "variation", "rate")
 		return(d2[order(d2$rate),])
 	}
 
-	if((length(timecol) < 2) | (length(baseratecol) < 2))
+	if(length(timecol) < 2)
 	{
-		plot(1,1,main="Insufficient time/rate data to plot in plotByRate")
+		plot(1,1,main="Insufficient time data to plot in plotByRate")
 		return()
 	}
 
+	if(length(baseratecol) < 2)
+	{
+	  plot(1,1,main="Insufficient rate data to plot in plotByRate")
+	  return()
+	}
+	
 	d = summariseDf(timecol, baseratetimes, baseratecol, datacol, percentile, breaksString)
 	if(length(d$rate) < 2)
 	{
@@ -76,7 +82,7 @@ plotByRate<-function(timecol, datacol, baseratecol, percentile, breaksString, ba
 				offsetVariation = abs(min(dbase$variation))
 				workingVariation = dbase$variation + offsetVariation
 				cutoff = (quantile(workingVariation, c(outlierPercentile), type=1,na.rm=TRUE)[1])-offsetVariation
-				dbase = dbase[dbase$variation < cutoff,]
+				dbase = dbase[which(dbase$variation < cutoff),]
 			}
 		}
 		plot(d$rate, d$variation, type="p", xlab=xlab, ylab=ylab, main=title, ylim=c(min(dbase$variation, d$variation), max(dbase$variation, d$variation)))

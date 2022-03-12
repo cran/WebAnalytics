@@ -16,10 +16,11 @@ brewFileName="brewdriver.$dateTime"
 texFileNameStem="$nameStem$dateTime"
 
 cat > $brewFileName <<End-of-script
-library(brew)
 e = new.env()
 with(e,{reportParameterFileName="$configfile"})
-a = brew(file="sampleRfile.R", output="$texFileNameStem.tex",envir=e)
+options(brew.extended.error = TRUE)
+options(show.error.messages = TRUE)
+a = brew::brew(file="sampleRfile.R", output="$texFileNameStem.tex",envir=e)
 if(exists("a")) {
 if(class(a) == "try-error"){
 	traceback(0)

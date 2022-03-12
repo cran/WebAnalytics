@@ -91,7 +91,11 @@ test_that("config default values are correct", {
   expect_equal(configVariableGet("config.generateDiagnosticPlots"), TRUE)
   expect_equal(configVariableGet("config.securityClass"), "Commercial-In-Confidence")
   expect_equal(configVariableGet("config.readBaseline"), FALSE)
-
+  expect_equal(configVariableGet("config.useragent.generateFrequencies"), TRUE)
+  expect_equal(configVariableGet("config.useragent.minimumPercentage"), 2)
+  expect_equal(configVariableGet("config.useragent.maximumPercentile"), 96)
+  expect_equal(configVariableGet("config.useragent.discardOther"), TRUE)
+  
   unlink(wkdir,recursive=TRUE)
 })
 

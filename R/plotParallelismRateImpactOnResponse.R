@@ -1,3 +1,22 @@
+#
+# plotParallelismRateImpactOnResponse 
+#
+#     Copyright (C) 2021  Greg Hunt <greg@firmansyah.com>
+#
+#     This program is free software: you can redistribute it and/or modify
+#     it under the terms of the GNU General Public License as published by
+#     the Free Software Foundation, either version 3 of the License, or
+#     (at your option) any later version.
+#
+#     This program is distributed in the hope that it will be useful,
+#     but WITHOUT ANY WARRANTY; without even the implied warranty of
+#     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#     GNU General Public License for more details.
+#
+#     You should have received a copy of the GNU General Public License
+#     along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+#
 plotParallelismRateImpactOnResponse<-function(b, intervalLength = 600, 
 											excludeURLOverall="", includeURLOverall="",
 											excludeResponse="",includeResponse="", 
@@ -8,12 +27,12 @@ plotParallelismRateImpactOnResponse<-function(b, intervalLength = 600,
 	workingSubtitle = ""
 	if(excludeURLOverall != "")
 	{
-		b = b[b$url != excludeURLOverall,]
+		b = b[which(b$url != excludeURLOverall),]
 		workingSubtitle = paste("excluding all", excludeURLOverall)
 	}
 	if(includeURLOverall != "")
 	{
-		b = b[b$url == includeURLOverall,]
+		b = b[which(b$url == includeURLOverall),]
 		if(workingSubtitle != "")
 		{
 			workingSubtitle= paste0(workingSubtitle,", ")
@@ -32,15 +51,15 @@ plotParallelismRateImpactOnResponse<-function(b, intervalLength = 600,
 	{
 		intervalEnd = as.POSIXct(numericInterval,origin=o)
 		# end time after start of interval and begin time before end of interval - everything that overlaps the interval 
-		c = b[(b$ts < intervalEnd) & ((b$ts + (b$elapsed/1000)) >= intervalStart),]
+		c = b[which((b$ts < intervalEnd) & ((b$ts + (b$elapsed/1000)) >= intervalStart)),]
 		# there is data
 		if(length(c$elapsed) > 0)
 		{
 			c$startTimeLong = as.numeric(c$ts)
-			c[c$ts < intervalStart, "startTimeLong"] = as.numeric(intervalStart) 
+			c[which(c$ts < intervalStart), "startTimeLong"] = as.numeric(intervalStart) 
 
 			c$endTimeLong = as.numeric(c$ts) + (c$elapsed/1000)
-			c[(c$ts + (c$elapsed/1000)) > intervalEnd, "endTimeLong"] = as.numeric(intervalEnd) 
+			c[which((c$ts + (c$elapsed/1000)) > intervalEnd), "endTimeLong"] = as.numeric(intervalEnd) 
 
 			c$elapsed = (c$endTimeLong - c$startTimeLong)*1000
 			
@@ -49,19 +68,19 @@ plotParallelismRateImpactOnResponse<-function(b, intervalLength = 600,
 			workingSet = c
 			if(includeResponse != "")
 			{
-				workingSet = workingSet[workingSet$url == includeResponse,]
+				workingSet = workingSet[which(workingSet$url == includeResponse),]
 			}
 			if(excludeResponse != "")
 			{
-				workingSet = workingSet[workingSet$url != excludeResponse,]
+				workingSet = workingSet[which(workingSet$url != excludeResponse),]
 			}
 			if(excludeStatus != "")
 			{
-				workingSet = workingSet[workingSet$status != excludeStatus,]
+				workingSet = workingSet[which(workingSet$status != excludeStatus),]
 			}
 			if(includeStatus != "")
 			{
-				workingSet = workingSet[workingSet$status == includeStatus,]
+				workingSet = workingSet[which(workingSet$status == includeStatus),]
 			}
 			
 			meanResponse = append(meanResponse, sum(workingSet$elapsed)/length(workingSet$elapsed))

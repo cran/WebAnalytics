@@ -20,17 +20,17 @@
 summaryTxDataFrameCreate <-function (logDataframe) 
 {
 	tnames = sort(unique(logDataframe$url))
-	tnames = tnames[tnames != ""]
+	tnames = tnames[which(tnames != "")]
 	tnames = na.omit(tnames)
 
 	d = data.frame()
 
 	for (thisName in tnames)
 	{
-		bxdat = logDataframe[logDataframe[ ,"url"] == thisName,]
+		bxdat = logDataframe[which(logDataframe[ ,"url"] == thisName),]
 		texName = laTeXEscapeString(thisName)
 		d = rbind(d, data.frame(seconds = quantile(round(bxdat$elapsed/1000, 2), 0.95, type = 1, na.rm=TRUE), 
-							ref=paste0("\\hyperlink{",digest(thisName,algo="sha1"),"}{\\urlshorten{",texName,"}}"), 
+							ref=paste0("\\hyperlink{",digest::digest(thisName,algo="sha1"),"}{\\urlshorten{",texName,"}}"), 
 							count=length(bxdat$elapsed), 
 							userImpact=sum(bxdat$elapsed)/1000, 
 							serverErrors=length(bxdat[bxdat$status=="Server Error",1]), 

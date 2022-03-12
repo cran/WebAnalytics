@@ -4,8 +4,6 @@ startDate = date()
 startCPU = proc.time()
 
 library(WebAnalytics)
-library(reshape2)
-library(ggthemes)
 
 scipenOption = options(scipen=999)
 
@@ -47,25 +45,26 @@ b = fixDataProcedure(
 		)
 	)
 
+#str(b)
+#print(b[which(is.na(b$ts)),])
+#print("===========================================")
+#print(b[which(is.na(b$elapsed)),])
+
 	noRequestBytes = TRUE
 	noResponseBytes = TRUE
 	
 	if(any(names(b) == "requestbytes"))
 	{
 	  noRequestBytes = FALSE
-	  if(length(b$responsebytes) > 0 & length(b$requestbytes) < 1)
-	  {
-		  b$requestbytes = 0 # not in this log, probably Apache
-		  noRequestBytes = TRUE
-	  }
+	} else {
+	    b$requestbytes = 0 # not in this log, probably Apache
+	    noRequestBytes = TRUE
 	}
 	if(any(names(b) == "responsebytes"))
 	{
 	  noResponseBytes = FALSE
-	  if(length(b$responsebytes) < 1)
-	  {
+	} else {
 	    noResponseBytes = TRUE
-	  }
 	}
 	a = b	
 
@@ -114,6 +113,8 @@ fd<-function(d)
 	return(as.character(as.POSIXct(d,origin=as.POSIXct("1970/01/01 00:00:00",tz = "GMT"))))
 }
 
+#save(b,file="b.Rdata")
+
 mints = min(a$ts)
 maxts = max(a$ts)
 %>
@@ -137,15 +138,15 @@ To &  <%= strftime(maxts) %> \\
 \begin{tabular}{l r r r r}
   & Total & Dynamic & Static & Monitoring \\
 \hline \\
-Requests & <%= f0(length(a$elapsed)) %> & <%= f0(length(a[a$url!="Static Content Requests" & a$url!="Monitoring",]$elapsed)) %> & <%= f0(length(a[a$url=="Static Content Requests",]$elapsed)) %> & <%= f0(length(a[a$url=="Monitoring",]$responsebytes)) %> \\
-Mean Elapsed (sec)& <%= f2(mean(a$elapsed)/1000) %> & <%= f2(mean(a[a$url!="Static Content Requests" & a$url!="Monitoring",]$elapsed)/1000) %> & <%= f2(mean(a[a$url=="Static Content Requests",]$elapsed)/1000) %> & <%= f2(mean(a[a$url=="Monitoring",]$elapsed)/1000) %> \\
-Total Elapsed (sec) & <%= f0(sum(a$elapsed)/1000) %> & <%= f0(sum(a[a$url!="Static Content Requests" & a$url!="Monitoring",]$elapsed)/1000) %> & <%= f0(sum(a[a$url=="Static Content Requests",]$elapsed)/1000) %> & <%= f0(sum(a[a$url=="Monitoring",]$elapsed/1000)) %> \\
+Requests & <%= f0(length(a$elapsed)) %> & <%= f0(length(a[which(a$url!="Static Content Requests" & a$url!="Monitoring"),]$elapsed)) %> & <%= f0(length(a[which(a$url=="Static Content Requests"),]$elapsed)) %> & <%= f0(length(a[which(a$url=="Monitoring"),]$responsebytes)) %> \\
+Mean Elapsed (sec)& <%= f2(mean(a$elapsed)/1000) %> & <%= f2(mean(a[which(a$url!="Static Content Requests" & a$url!="Monitoring"),]$elapsed)/1000) %> & <%= f2(mean(a[which(a$url=="Static Content Requests"),]$elapsed)/1000) %> & <%= f2(mean(a[which(a$url=="Monitoring"),]$elapsed)/1000) %> \\
+Total Elapsed (sec) & <%= f0(sum(a$elapsed)/1000) %> & <%= f0(sum(a[which(a$url!="Static Content Requests" & a$url!="Monitoring"),]$elapsed)/1000) %> & <%= f0(sum(a[which(a$url=="Static Content Requests"),]$elapsed)/1000) %> & <%= f0(sum(a[which(a$url=="Monitoring"),]$elapsed/1000)) %> \\
 <%
 if(noResponseBytes == FALSE)
 {
 %>
-Mean kBytes Out& <%= f2(mean(a$responsebytes)/1000) %> & <%= f2(mean(a[a$url!="Static Content Requests" & a$url!="Monitoring",]$responsebytes)/1000) %> & <%= f2(mean(a[a$url=="Static Content Requests",]$responsebytes)/1000) %> & <%= f2(mean(a[a$url=="Monitoring",]$responsebytes)/1000) %> \\
-Total kBytes Out& <%= f0(sum(a$responsebytes)/1000) %> & <%= f0(sum(a[a$url!="Static Content Requests" & a$url!="Monitoring",]$responsebytes)/1000) %> & <%= f0(sum(a[a$url=="Static Content Requests",]$responsebytes)/1000) %> & <%= f0(sum(a[a$url=="Monitoring",]$responsebytes)/1000) %> \\
+Mean kBytes Out& <%= f2(mean(a$responsebytes,na.rm=TRUE)/1000) %> & <%= f2(mean(a[which(a$url!="Static Content Requests" & a$url!="Monitoring"),]$responsebytes,na.rm=TRUE)/1000) %> & <%= f2(mean(a[which(a$url=="Static Content Requests"),]$responsebytes,na.rm=TRUE)/1000) %> & <%= f2(mean(a[which(a$url=="Monitoring"),]$responsebytes,na.rm=TRUE)/1000) %> \\
+Total kBytes Out& <%= f0(sum(a$responsebytes,na.rm=TRUE)/1000) %> & <%= f0(sum(a[which(a$url!="Static Content Requests" & a$url!="Monitoring"),]$responsebytes,na.rm=TRUE)/1000) %> & <%= f0(sum(a[which(a$url=="Static Content Requests"),]$responsebytes,na.rm=TRUE)/1000) %> & <%= f0(sum(a[which(a$url=="Monitoring"),]$responsebytes,na.rm=TRUE)/1000) %> \\
 <%
 }
 %>
@@ -155,7 +156,7 @@ Total kBytes Out& <%= f0(sum(a$responsebytes)/1000) %> & <%= f0(sum(a[a$url!="St
 \vspace{\baselineskip}
 \subsection*{Response Time Percentiles}
 <%
-a = b[b$url!="Static Content Requests" & b$url!="Monitoring",]
+a = b[which(b$url!="Static Content Requests" & b$url!="Monitoring"),]
 
 xtableOptions = options(xtable.latex.environments = "")
 printPercentiles(a$elapsed/1000, dataName="Response Time (seconds)")
@@ -270,23 +271,23 @@ tnames = na.omit(tnames)
 
 for (thisName in tnames)
 {
-	bxdat = b[b[ ,"url"] == thisName,]
+	bxdat = b[which(b[ ,"url"] == thisName),]
 	if(length(baseline) > 0)
 	{
-		baselineTxDat = savedBaseline[savedBaseline[ ,"url"] == thisName,]
+		baselineTxDat = savedBaseline[which(savedBaseline[ ,"url"] == thisName),]
 	}
 	texname = laTeXEscapeString(thisName) 
    # --------------------------------------------------------------------------------------------------------------------------------------------------
    # --------------------------------------------------------------------------------------------------------------------------------------------------
 %>
-\hypertarget{<%=digest(thisName,algo="sha1")%>}{}
+\hypertarget{<%=digest::digest(thisName,algo="sha1")%>}{}
 \section[<%=texname%>]{\urlshorten{<%=texname%>}}
 \urlshortenconditionaltext{Path shortened in section heading, full text is:\\\url{<%=texname%>}}
 
-\paragraph{}Requests: <%=length(bxdat$elapsed)%> (<%=strftime(min(bxdat$ts))%> to <%=strftime(max(bxdat$ts))%>)
+\paragraph{}Requests: <%=length(bxdat$elapsed)%> (<%=strftime(min(bxdat$ts,na.rm=TRUE))%> to <%=strftime(max(bxdat$ts,na.rm=TRUE))%>)
 	<%
 	printPercentiles(bxdat$elapsed/1000, dataName="Response Time (seconds)")
-	if(max(bxdat$elapsed) > configVariableGet("config.generateGraphForTimeOver"))
+	if(max(bxdat$elapsed,na.rm=TRUE) > configVariableGet("config.generateGraphForTimeOver"))
 	{
 %>
 \subsection*{Response Time Scatter Plot}
@@ -298,7 +299,7 @@ for (thisName in tnames)
 \subsection*{Response Time Frequency Distribution}
 <%
 		plotWriteFilenameToLaTexFile(plotSaveGG(plotFrequencyHistogram(bxdat),paste0(thisName,"responsetimeshistogram"),"eps"))
-		if(max(bxdat$elapsed) > 10000)
+		if(max(bxdat$elapsed,na.rm=TRUE) > 10000)
 		{
 			laTeXParagraphWrite()
 			plotWriteFilenameToLaTexFile(plotSaveGG(plotFrequencyHistogramOutlierCutoff(bxdat,0.99),paste0(thisName,"cutresponsetimeshistogram"),"eps"))
@@ -376,6 +377,70 @@ No response size data in logs
 <%
 }
 }
+if((configVariableGet("config.useragent.generateFrequencies") == TRUE))
+{
+%>
+\clearpage
+\chapter[User Agent (Browser) Frequencies]{Browser Frequencies}
+<%
+    if(("useragent" %in% names(b))) {
+%>
+  
+Browser frequencies in this report are mainly useful for targeting application testing.  The objective must be to balance 
+test cost (number of browsers tested) againt population coverage. For that reason, the report specifies both a
+minimum browser family percentage and a cumulative percentage cutoff, for example not spending test 
+resources on browsers that represent less than 2 percent of the 
+population but aiming for test coverage of 95 percent of visitors.
+
+A high occurrence of hits from User agent family "Other" is likely to indicate use of a monitoring request or heartbeat.  
+
+<%
+minPercent = configVariableGet("config.useragent.minimumPercentage")
+maxPercentile = configVariableGet("config.useragent.maximumPercentile")
+%>
+
+\begin{tabular}{l r }
+\hline \\
+Minimum Percentage for inclusion  & <%= minPercent %> \\
+Cumulative Percentage Cutoff &  <%= maxPercentile %> \\
+Exclude "Other" User Agents  &  <%= configVariableGet("config.useragent.discardOther")  %> \\
+\hline 
+\end{tabular}
+
+\section{User Agent Frequency by Browser Family}
+<%
+library(uaparserjs)
+uadf = ua_parse(a$useragent)
+if (configVariableGet("config.useragent.discardOther") == TRUE) 
+  uadf = uadf[uadf$ua.family != "Other",]
+
+uaFamily = aggregate(uadf$ua.family, by=list(uadf$ua.family),FUN=length)
+totalFamily = sum(uaFamily$x)
+uaFamily$pct = 100 * uaFamily$x/totalFamily
+uaFamily = uaFamily[order(uaFamily$pct, decreasing=TRUE),]
+uaFamily$cpct = cumsum(uaFamily$pct)
+
+names(uaFamily) = c("Browser Family", "Count", "Percent", "Cumulative Percentage")
+
+print(xtable(uaFamily[uaFamily$Percent > minPercent & uaFamily$`Cumulative Percentage`< maxPercentile,]), include.rownames=FALSE)
+
+%>
+  \section{User Agent Frequency by Browser Family and Version}
+<%
+uaVersion = aggregate(uadf$ua.family, by=list(uadf$ua.family, uadf$ua.major),FUN=length)
+totalVersion = sum(uaVersion$x)
+uaVersion$pct = 100 * uaVersion$x/totalVersion
+uaVersion = uaVersion[order(uaVersion$pct, decreasing=TRUE),]
+uaVersion$cpct = cumsum(uaVersion$pct)
+names(uaVersion) = c("Browser","Version", "Count", "Percent", "Cumulative Percentage")
+
+print(xtable(uaVersion[uaVersion$Percent > minPercent & uaVersion$`Cumulative Percentage`< maxPercentile,]), include.rownames=FALSE)
+    } else {
+%>
+Browser percentage report selected but no useragent data is present.  
+<%
+    }
+}
 if(configVariableGet("config.generateDiagnosticPlots") == TRUE)
 {
 %>
@@ -413,7 +478,7 @@ parallelism levels and data rates for different types of transaction.  By defaul
 %>
 \section{Do static content redirects get slower with increasing degrees of request parallelism?}
 <%
-  if(length(b[b$url =="Static Content Requests","url"] > 0))
+  if(length(b[which(b$url =="Static Content Requests"),"url"] > 0))
   {
     laTeXParagraphWrite("These are redirects for static content, unchanged responses and the like: they represent minimal server service demand, and negligible network time")
     laTeXParagraphWrite()
@@ -430,7 +495,7 @@ parallelism levels and data rates for different types of transaction.  By defaul
 %>
 \section{Do successful static content requests get slower with increasing parallelism?}
 <%
-  if(length(b[b$url =="Static Content Requests","url"] > 0))
+  if(length(b[which(b$url =="Static Content Requests"),"url"] > 0))
   {
     laTeXParagraphWrite("The difference between these and the redirects is mostly network time, network contention should show up here")
     laTeXParagraphWrite()
@@ -438,7 +503,7 @@ parallelism levels and data rates for different types of transaction.  By defaul
 %>
 \subsection*{Excluding 95th percentile outliers}
 <%
-    plotWriteFilenameToLaTexFile(plotSave(plotPasrallelismRateImpactOnResponse(b,includeStatus="Success",includeResponse="Static Content Requests",percentileCutoff=0.95), "parallelismrate3a","eps"))
+    plotWriteFilenameToLaTexFile(plotSave(plotParallelismRateImpactOnResponse(b,includeStatus="Success",includeResponse="Static Content Requests",percentileCutoff=0.95), "parallelismrate3a","eps"))
   }
   else
   {
@@ -447,7 +512,7 @@ parallelism levels and data rates for different types of transaction.  By defaul
 %>
 \section{Do successful static content requests get slower with increasing outbound data rate?}
 <%
-  if(length(b[b$url =="Static Content Requests","url"] > 0))
+  if(length(b[which(b$url =="Static Content Requests"),"url"] > 0))
   {
     laTeXParagraphWrite("The difference between these and the redirects is mostly network time, network contention should show up here")
     laTeXParagraphWrite()
@@ -474,8 +539,8 @@ the excluded transaction's response times are examined during development to ens
 \begin{tabular}{r l l l r r r r}
   & Count & Start Time & End Time & Dynamic & Static & Monitoring & Monitoring Delay\\
  \hline \\
-Baseline & <%= f0(length(baseline$elapsed)) %> & <%= fd(min(baseline$ts)) %> & <%= fd(max(baseline$ts)) %> &  <%= f0(length(baseline[baseline$url!="Static Content Requests" & baseline$url!="Monitoring",]$elapsed)) %> & <%= f0(length(baseline[baseline$url=="Static Content Requests",]$elapsed)) %> & <%= f0(length(baseline[baseline$url=="Monitoring",]$responsebytes)) %>  & <%= f2((sum(baseline[baseline$url=="Monitoring",]$elapsed)/sum(baseline$elapsed))*100) %>\% \\
-Comparison & <%= f0(length(b$elapsed)) %> & <%= fd(min(b$ts)) %> & <%= fd(max(b$ts)) %> &  <%= f0(length(b[b$url!="Static Content Requests" & b$url!="Monitoring",]$elapsed)) %> & <%= f0(length(b[b$url=="Static Content Requests",]$elapsed)) %> & <%= f0(length(b[b$url=="Monitoring",]$responsebytes)) %> & <%= f2((sum(b[b$url=="Monitoring",]$elapsed)/sum(b$elapsed))*100) %>\% \\
+Baseline & <%= f0(length(baseline$elapsed)) %> & <%= fd(min(baseline$ts,na.rm=TRUE)) %> & <%= fd(max(baseline$tsna)) %> &  <%= f0(length(baseline[which(baseline$url!="Static Content Requests" & baseline$url!="Monitoring"),]$elapsed)) %> & <%= f0(length(baseline[which(baseline$url=="Static Content Requests"),]$elapsed)) %> & <%= f0(length(baseline[which(baseline$url=="Monitoring"),]$responsebytes)) %>  & <%= f2((sum(baseline[which(baseline$url=="Monitoring"),]$elapsed)/sum(baseline$elapsed))*100) %>\% \\
+Comparison & <%= f0(length(b$elapsed)) %> & <%= fd(min(b$ts)) %> & <%= fd(max(b$ts)) %> &  <%= f0(length(b[which(b$url!="Static Content Requests" & b$url!="Monitoring"),]$elapsed)) %> & <%= f0(length(b[which(b$url=="Static Content Requests"),]$elapsed)) %> & <%= f0(length(b[which(b$url=="Monitoring"),]$responsebytes)) %> & <%= f2((sum(b[which(b$url=="Monitoring"),]$elapsed)/sum(b$elapsed))*100) %>\% \\
 \hline
 \end{tabular}
 <%
@@ -562,7 +627,7 @@ session counts by hour.
 		sessbyhour = aggregate(sess$x,by=list(sess$hour, sess$Group.2),max)
 		names(sessbyhour) = c("Hour", "Server", "Max Sessions")
 		
-		tdata = t(dcast(Hour ~ Server, data=sessbyhour, value.var="Max Sessions"))
+		tdata = t(reshape2::dcast(Hour ~ Server, data=sessbyhour, value.var="Max Sessions"))
 		tdata[is.na(tdata)] = 0
 		attr(tdata,"dimnames")[[1]][1] = "hour"
 %>

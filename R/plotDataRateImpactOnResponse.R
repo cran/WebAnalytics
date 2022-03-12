@@ -19,7 +19,7 @@
 #
 plotDataRateImpactOnResponse<-function(dataFrame, filterURL, status)
 {
-	c = dataFrame[dataFrame$url == filterURL & dataFrame$status == status,]
+	c = dataFrame[which(dataFrame$url == filterURL & dataFrame$status == status),]
 	if(nrow(c) < 1)
 	{
 	  warning("In plotDataRateImpactOnResponse the filters ", filterURL, " and ", status , " excluded all rows")

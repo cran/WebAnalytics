@@ -1,7 +1,7 @@
 #
 # plotDataRateImpactOnStaticResponse 
 #
-#     Copyright (C) 2021  Greg Hunt <greg@firmansyah.com>
+#     Copyright (C) 2021 Greg Hunt <greg@firmansyah.com>
 #
 #     This program is free software: you can redistribute it and/or modify
 #     it under the terms of the GNU General Public License as published by
@@ -20,8 +20,8 @@
 plotDataRateImpactOnStaticResponse<-function(dataFrame)
 {
 	# extract the static behaviour
-	c = dataFrame[dataFrame$url == "Static Content Requests" & dataFrame$status == "Success",]
+	c = dataFrame[which(dataFrame$url == "Static Content Requests" & dataFrame$status == "Success"),]
 	# frate is divided by 600 to get from ten minute rate to mean 1 second rate
-	plotByRate(c$posixtimes, c$elapsed, ((dataFrame$responsebytes + dataFrame$requestbytes)/1000)/600, 0.95, "10 mins",baseratetimes = dataFrame$posixtimes, 
+	plotByRate(c$ts, c$elapsed, ((dataFrame$responsebytes + dataFrame$requestbytes)/1000)/600, 0.95, "10 mins",baseratetimes = dataFrame$ts, 
 	xlab="Data Rate (kB/sec, 10 minute average)", ylab="Difference from overall 95th percentile (milliseconds)", title="Effect of overall data rate on static content response time")
 }

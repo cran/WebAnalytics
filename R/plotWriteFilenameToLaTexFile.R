@@ -1,5 +1,5 @@
 #
-#     plotWriteFilenameToLaTexFile.R - base file acccess function 
+# plotWriteFilenameToLaTexFile - base file acccess function 
 #
 #     Copyright (C) 2021  Greg Hunt <greg@firmansyah.com>
 #

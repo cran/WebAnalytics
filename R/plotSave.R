@@ -27,7 +27,7 @@ plotSave<-function (thePlot, fileID, fileType = "jpg", imageQuality=90, imageDef
   {
     stop("plotSave parameter fileType was neither jpg nor eps: ", fileType)
   }
-	graphicName = paste0(configFilesDirectoryNameGet(), digest(fileID), ".", fileType)
+	graphicName = paste0(configFilesDirectoryNameGet(), digest::digest(fileID), ".", fileType)
 	if("jpg" == fileType)
 	{
 	  jpeg(filename = graphicName, quality=imageQuality, width=imageDefaultWidth, height=imageDefaultHeight)
