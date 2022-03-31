@@ -81,6 +81,8 @@ logFileRead <-function(fileName, columnList=c("MSTimestamp", "clientip", "url", 
 			}
 		}
 	}
+	#message("column list being read")
+	#message(wkColumnList)
 	# logRecs = withCallingHandlers(read.table(fileName, 
 	#                               header=FALSE, 
 	#                               quote="\"'", 
@@ -88,20 +90,40 @@ logFileRead <-function(fileName, columnList=c("MSTimestamp", "clientip", "url", 
 	# 									            colClasses = wkTypeList,
 	# 									            na.strings="-",
 	# 									            stringsAsFactors = TRUE), # more minimising the memory footprint
+	logRecs = withCallingHandlers(data.table::fread(file=fileName,
+	                              header=FALSE,
+	                              #sep=" ",
+	                              # quote="\"'",
+	                              col.names = unlist(wkColumnList),
+										            colClasses = unlist(wkTypeList),
+										            na.strings="-",
+										            stringsAsFactors = TRUE), 
 	
-	logRecs = withCallingHandlers(as.data.frame(readr::read_delim(fileName,
-	                                                       delim = " ",
-	                                                       quote = "\"",
-										                       escape_backslash = TRUE,
-										                       col_names = FALSE,
-										                       col_types = wkTypeList,
-										                       na = c("-"),
-										                       comment = "#")),
+#	logRecs = withCallingHandlers(
+	
+	# readrcolTypeSpec = ""
+	# for(typechar in wkTypeList)
+	# {
+	#   if(typechar == "character")
+	#     thischar = "c"
+	#   if(typechar == "numeric")
+	#     thischar = "i"
+	#   readrcolTypeSpec = paste0(readrcolTypeSpec, thischar )
+	# }
+	#   logRecs = readr::read_delim(fileName,
+	#                                                        delim = " ",
+	#                                                        quote = "\"",
+	# 									                       escape_backslash = TRUE,
+	# 									                       col_names = FALSE,
+	# 									                       col_types = readrcolTypeSpec,
+	# 									                       na = c("-"),
+	# 									                       comment = "#",
+	# 									                       progress=FALSE)
 										                                          error=function(e)
 										{
-											message("")				
-											message("Error Trapped reading data file:")		
-											message(toString(e))				
+											message("")
+											message("Error Trapped reading data file:")
+											message(toString(e))
 											message("Columns: ",toString(wkColumnList))
 											message("Types: ",toString(wkTypeList))
 											colCount = length(wkColumnList)
@@ -127,6 +149,12 @@ logFileRead <-function(fileName, columnList=c("MSTimestamp", "clientip", "url", 
 										}
 				)
 			
+	#print(wkTypeList)
+#	warning(readr::problems(logRecs))
+#	readr::stop_for_problems(logRecs)
+	
+	logRecs = as.data.frame(logRecs)
+	
 	names(logRecs) = wkColumnList
 	
 	#print(str(logRecs))	

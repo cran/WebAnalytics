@@ -60,7 +60,16 @@ The function returns a dataframe that contains the contents of the file.
 Greg Hunt <greg@firmansyah.com>
 }
 \examples{
-datd = dirname(system.file("extdata", "compressed.log", package = "WebAnalytics"))
+\dontshow{
+datd = paste0(tempdir(),"/minconfigtemp")
+unlink(datd)
+dir.create(paste0(tempdir(),"/minconfigtemp"))
+logfile = paste0(datd,"/log.log")
+fileConn = gzfile(system.file("extdata", "compressed.log", package = "WebAnalytics"))
+writeLines(readLines(fileConn),con=logfile)
+close(fileConn)
+}
+
 logFileName = logFileNamesGetLast(dataDirectory=datd, 
   directoryNames=c(".", "."), 
   fileNamePattern="*[.]log")[[1]]

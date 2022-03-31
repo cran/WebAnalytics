@@ -24,6 +24,17 @@ Does not return a value.  It prints the xtable.
 Greg Hunt <greg@firmansyah.com>
 }
 \examples{
+\dontshow{
+datd = paste0(tempdir(),"/minconfigtemp")
+unlink(datd)
+dir.create(paste0(tempdir(),"/minconfigtemp"))
+logfile = paste0(datd,"/log.log")
+fileConn = gzfile(system.file("extdata", "compressed.log", package = "WebAnalytics"))
+writeLines(readLines(fileConn),con=logfile)
+close(fileConn)
+# set the files directory name suitable for an R example
+configVariableSet("config.workdir", tempdir())
+}
 f0<-function(n)
 {
 	return(format(n,digits=1,nsmall=0,big.mark=","))
@@ -32,7 +43,6 @@ f2<-function(n)
 {
 	return(format(n,digits=2,nsmall=2,big.mark=","))
 }
-datd = dirname(system.file("extdata", "compressed.log", package = "WebAnalytics"))
 logFileName = logFileNamesGetLast(dataDirectory=datd, 
   directoryNames=c(".", "."), 
   fileNamePattern="*[.]log")[[1]]

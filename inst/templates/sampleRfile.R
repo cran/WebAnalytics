@@ -1,18 +1,17 @@
 \documentclass{webanalytics}
 <%
+message(Sys.time(), " start of report processing ")	
+
 startDate = date()
 startCPU = proc.time()
 
 library(WebAnalytics)
 
 scipenOption = options(scipen=999)
-
 setEPS(onefile=TRUE)
-
 configVariablesLoad(fileName=reportParameterFileName)
 
 %>
-
 \author{<%=configVariableGet("config.author")%>}
 \projectname{<%=configVariableGet("config.projectName")%>}
 \title{<%=configVariableGet("config.documentName")%>}
@@ -24,96 +23,103 @@ configVariablesLoad(fileName=reportParameterFileName)
 \tableofcontents
 \pagebreak
 <%
+
+
+
 fixDataProcedure<-function(b) { return(b) }
 
 if(configVariableIs("config.fix.data"))
 {
-	fixDataProcedure=configVariableGet("config.fix.data")
+  fixDataProcedure=configVariableGet("config.fix.data")
 }
 
 if(configVariableIs("config.fix.current.data"))
 {
-	fixDataProcedure=configVariableGet("config.fix.current.data")
+  fixDataProcedure=configVariableGet("config.fix.current.data")
 }
 
 fileNames = logFileNamesGetLast(dataDirectory=configVariableGet("config.current.dataDir"),directoryNames=configVariableGet("config.current.dirNames"))
 
 b = fixDataProcedure(
-		logFileListRead(
-			fileNames
-			,columnList=configVariableGet("config.current.columnList")
-		)
-	)
+  logFileListRead(
+    fileNames
+    ,columnList=configVariableGet("config.current.columnList")
+  )
+)
 
-#str(b)
+message(Sys.time(), " read data")	
+
 #print(b[which(is.na(b$ts)),])
 #print("===========================================")
 #print(b[which(is.na(b$elapsed)),])
 
-	noRequestBytes = TRUE
-	noResponseBytes = TRUE
-	
-	if(any(names(b) == "requestbytes"))
-	{
-	  noRequestBytes = FALSE
-	} else {
-	    b$requestbytes = 0 # not in this log, probably Apache
-	    noRequestBytes = TRUE
-	}
-	if(any(names(b) == "responsebytes"))
-	{
-	  noResponseBytes = FALSE
-	} else {
-	    noResponseBytes = TRUE
-	}
-	a = b	
+noRequestBytes = TRUE
+noResponseBytes = TRUE
 
-	baselineFileNames = NULL
-	
-	if(configVariableGet("config.readBaseline") == TRUE)
-	{
-		if(configVariableIs("config.fix.baseline.data"))
-		{
-			fixDataProcedure=configVariableGet("config.fix.baseline.data")
-		}
+if(any(names(b) == "requestbytes"))
+{
+  noRequestBytes = FALSE
+} else {
+  b$requestbytes = 0 # not in this log, probably Apache
+  noRequestBytes = TRUE
+}
+if(any(names(b) == "responsebytes"))
+{
+  noResponseBytes = FALSE
+} else {
+  noResponseBytes = TRUE
+}
 
-	  
-baselineFileNames = logFileNamesGetLast(dataDirectory=configVariableGet("config.baseline.dataDir"),directoryNames=configVariableGet("config.baseline.dirNames"))
+a = b	
 
-		baseline = fixDataProcedure(
-		  logFileListRead(
-		    baselineFileNames
-							,columnList=configVariableGet("config.baseline.columnList")
-						)
-					)
+#save(a,file="b.RData")
 
-		if(length(baseline$responsebytes) > 0 & length(baseline$requestbytes) < 1)
-		{
-			baseline$requestbytes = 0 # not in this log, probably Apache
-		}
-		
-	} else {
-		baseline = data.frame()
-	}
+
+baselineFileNames = NULL
+
+if(configVariableGet("config.readBaseline") == TRUE)
+{
+  if(configVariableIs("config.fix.baseline.data"))
+  {
+    fixDataProcedure=configVariableGet("config.fix.baseline.data")
+  }
+  
+  
+  baselineFileNames = logFileNamesGetLast(dataDirectory=configVariableGet("config.baseline.dataDir"),directoryNames=configVariableGet("config.baseline.dirNames"))
+  
+  baseline = fixDataProcedure(
+    logFileListRead(
+      baselineFileNames
+      ,columnList=configVariableGet("config.baseline.columnList")
+    )
+  )
+  message(Sys.time(), " read baseline")	
+  
+  if(length(baseline$responsebytes) > 0 & length(baseline$requestbytes) < 1)
+  {
+    baseline$requestbytes = 0 # not in this log, probably Apache
+  }
+  
+} else {
+  baseline = data.frame()
+}
 
 f0<-function(n)
 {
-	return(format(n,digits=1,nsmall=0,big.mark=","))
+  return(format(n,digits=1,nsmall=0,big.mark=","))
 }
 f1<-function(n)
 {
-	return(format(n,digits=1,nsmall=1,big.mark=","))
+  return(format(n,digits=1,nsmall=1,big.mark=","))
 }
 f2<-function(n)
 {
-	return(format(n,digits=2,nsmall=2,big.mark=","))
+  return(format(n,digits=2,nsmall=2,big.mark=","))
 }
 fd<-function(d)
 {
-	return(as.character(as.POSIXct(d,origin=as.POSIXct("1970/01/01 00:00:00",tz = "GMT"))))
+  return(as.character(as.POSIXct(d,origin=as.POSIXct("1970/01/01 00:00:00",tz = "GMT"))))
 }
-
-#save(b,file="b.Rdata")
 
 mints = min(a$ts)
 maxts = max(a$ts)
@@ -128,7 +134,7 @@ maxts = max(a$ts)
 \hline \\
 From  & <%= strftime(mints) %> \\
 To &  <%= strftime(maxts) %> \\
- & <%= f1(difftime(maxts, mints, units="auto")) %> \\
+& <%= f1(difftime(maxts, mints, units="auto")) %> \\
 \hline 
 \end{tabular}
 
@@ -136,7 +142,7 @@ To &  <%= strftime(maxts) %> \\
 \subsection*{Record Counts}
 
 \begin{tabular}{l r r r r}
-  & Total & Dynamic & Static & Monitoring \\
+& Total & Dynamic & Static & Monitoring \\
 \hline \\
 Requests & <%= f0(length(a$elapsed)) %> & <%= f0(length(a[which(a$url!="Static Content Requests" & a$url!="Monitoring"),]$elapsed)) %> & <%= f0(length(a[which(a$url=="Static Content Requests"),]$elapsed)) %> & <%= f0(length(a[which(a$url=="Monitoring"),]$responsebytes)) %> \\
 Mean Elapsed (sec)& <%= f2(mean(a$elapsed)/1000) %> & <%= f2(mean(a[which(a$url!="Static Content Requests" & a$url!="Monitoring"),]$elapsed)/1000) %> & <%= f2(mean(a[which(a$url=="Static Content Requests"),]$elapsed)/1000) %> & <%= f2(mean(a[which(a$url=="Monitoring"),]$elapsed)/1000) %> \\
@@ -193,7 +199,7 @@ Change over baseline includes only dynamic content requests.  If static content 
 were included they would dilute the 
 variation in the 
 transaction response time because they are typically quick and typically outnumber the dynamic content requests.  
-
+  
 \begin{tabular}{l r l l l } 
 & Count & From & To & Elapsed \\
 \hline \\
@@ -201,9 +207,9 @@ Baseline  & <%= length(baseline$elapsed) %> & <%= strftime(min(baseline$ts)) %> 
 Current & <%= length(a$elapsed) %>  & <%= strftime(min(a$ts)) %> & <%= strftime(max(a$ts)) %> & <%= f1(difftime(max(a$ts), min(a$ts), units="auto")) %> \\
 \hline 
 \end{tabular}
-
+  
 <%
-plotWriteFilenameToLaTexFile(plotSaveGG(percentileBaselinePrint(a$elapsed/1000, baseline$elapsed/1000),"percentilebaseline","eps"))
+  plotWriteFilenameToLaTexFile(plotSaveGG(percentileBaselinePrint(a$elapsed/1000, baseline$elapsed/1000),"percentilebaseline","eps"))
 }
 %>  
 \clearpage
@@ -214,7 +220,7 @@ if(noResponseBytes == FALSE){
 \paragraph{}Response Sizes, Mean: <%= mean(a$responsebytes, na.rm=TRUE) %> bytes
 \paragraph{}
 <%
-printPercentiles(a$responsebytes/1000, dataName="Response Size (kBytes)")
+  printPercentiles(a$responsebytes/1000, dataName="Response Size (kBytes)")
 } else
 {
 %>
@@ -226,14 +232,13 @@ if(noRequestBytes == FALSE){
 \paragraph{}Request Sizes, Mean: <%= mean(a$requestbytes, na.rm=TRUE) %> bytes
 \paragraph{}
 <%
-printPercentiles(a$requestbytes/1000, dataName="Request Size (kBytes)")
+  printPercentiles(a$requestbytes/1000, dataName="Request Size (kBytes)")
 } else
 {
 %>
 \paragraph{}No request size data in log
 <%
 }
-
 %>
 \clearpage
 \chapter[Top Lists]{Top Lists}
@@ -260,145 +265,148 @@ summaryTxTablePrint(summaryTable[1:40,c(2,5,6,7,8,3)])
 
 if(configVariableGet("config.generateTransactionDetails") == TRUE)
 {
+  message(Sys.time(), " beginning of transaction reports")	
+  
 %>
 \clearpage
 \chapter[Transaction Data]{Transaction Data}
 <%
-
-tnames = sort(unique(b$url))
-tnames = tnames[tnames != ""]
-tnames = na.omit(tnames)
-
-for (thisName in tnames)
-{
-	bxdat = b[which(b[ ,"url"] == thisName),]
-	if(length(baseline) > 0)
-	{
-		baselineTxDat = savedBaseline[which(savedBaseline[ ,"url"] == thisName),]
-	}
-	texname = laTeXEscapeString(thisName) 
-   # --------------------------------------------------------------------------------------------------------------------------------------------------
-   # --------------------------------------------------------------------------------------------------------------------------------------------------
+  
+  tnames = sort(unique(b$url))
+  tnames = tnames[tnames != ""]
+  tnames = na.omit(tnames)
+  
+  for (thisName in tnames)
+  {
+    bxdat = b[which(b[ ,"url"] == thisName),]
+    if(length(baseline) > 0)
+    {
+      baselineTxDat = savedBaseline[which(savedBaseline[ ,"url"] == thisName),]
+    }
+    texname = laTeXEscapeString(thisName) 
+    # --------------------------------------------------------------------------------------------------------------------------------------------------
+    # --------------------------------------------------------------------------------------------------------------------------------------------------
 %>
 \hypertarget{<%=digest::digest(thisName,algo="sha1")%>}{}
 \section[<%=texname%>]{\urlshorten{<%=texname%>}}
 \urlshortenconditionaltext{Path shortened in section heading, full text is:\\\url{<%=texname%>}}
-
+    
 \paragraph{}Requests: <%=length(bxdat$elapsed)%> (<%=strftime(min(bxdat$ts,na.rm=TRUE))%> to <%=strftime(max(bxdat$ts,na.rm=TRUE))%>)
-	<%
-	printPercentiles(bxdat$elapsed/1000, dataName="Response Time (seconds)")
-	if(max(bxdat$elapsed,na.rm=TRUE) > configVariableGet("config.generateGraphForTimeOver"))
-	{
+<%
+    printPercentiles(bxdat$elapsed/1000, dataName="Response Time (seconds)")
+    if(max(bxdat$elapsed,na.rm=TRUE) > configVariableGet("config.generateGraphForTimeOver"))
+    {
 %>
 \subsection*{Response Time Scatter Plot}
 <%	
-		plotWriteFilenameToLaTexFile(plotSave(plotResponseTimeScatter(bxdat$ts, bxdat$elapsed), paste0(thisName,"scatterplot.jpg")))
-	  laTeXParagraphWrite()
-	  plotWriteFilenameToLaTexFile(plotSave(plotLogResponseTimeScatter(bxdat$ts, bxdat$elapsed), paste0(thisName,"logscatterplot.jpg")))
-	  %>
+      plotWriteFilenameToLaTexFile(plotSave(plotResponseTimeScatter(bxdat$ts, bxdat$elapsed), paste0(thisName,"scatterplot.jpg")))
+      laTeXParagraphWrite()
+      plotWriteFilenameToLaTexFile(plotSave(plotLogResponseTimeScatter(bxdat$ts, bxdat$elapsed), paste0(thisName,"logscatterplot.jpg")))
+%>
 \subsection*{Response Time Frequency Distribution}
 <%
-		plotWriteFilenameToLaTexFile(plotSaveGG(plotFrequencyHistogram(bxdat),paste0(thisName,"responsetimeshistogram"),"eps"))
-		if(max(bxdat$elapsed,na.rm=TRUE) > 10000)
-		{
-			laTeXParagraphWrite()
-			plotWriteFilenameToLaTexFile(plotSaveGG(plotFrequencyHistogramOutlierCutoff(bxdat,0.99),paste0(thisName,"cutresponsetimeshistogram"),"eps"))
-		}
-		if(length(baseline) > 0)
-		{
+      plotWriteFilenameToLaTexFile(plotSaveGG(plotFrequencyHistogram(bxdat),paste0(thisName,"responsetimeshistogram"),"eps"))
+      if(max(bxdat$elapsed,na.rm=TRUE) > 10000)
+      {
+        laTeXParagraphWrite()
+        plotWriteFilenameToLaTexFile(plotSaveGG(plotFrequencyHistogramOutlierCutoff(bxdat,0.99),paste0(thisName,"cutresponsetimeshistogram"),"eps"))
+      }
+      if(length(baseline) > 0)
+      {
 %>
 \clearpage
 \subsection*{Change over baseline} 
 <%
-			if(length(baselineTxDat$url) >1) 
-			{
-				plotWriteFilenameToLaTexFile(plotSaveGG(percentileBaselinePrint(bxdat$elapsed/1000, baselineTxDat$elapsed/1000),paste0(thisName,"percentilebaseline"),"eps"))
-			}
-			else
-			{
-				laTeXParagraphWrite("No Baseline Data")
-			}
-		}
+        if(length(baselineTxDat$url) >1) 
+        {
+          plotWriteFilenameToLaTexFile(plotSaveGG(percentileBaselinePrint(bxdat$elapsed/1000, baselineTxDat$elapsed/1000),paste0(thisName,"percentilebaseline"),"eps"))
+        }
+        else
+        {
+          laTeXParagraphWrite("No Baseline Data")
+        }
+      }
 %>
 \subsection*{Request Status By Hour}
 <%
-		plotWriteFilenameToLaTexFile(plotSaveGG(plotErrorRateByHour(bxdat),paste0(thisName,"errorrate"),"eps"))
-		laTeXParagraphWrite()
-		if(length(baseline) > 0)
-		{
-			if(length(baselineTxDat$url) >1) 
-			{
+      plotWriteFilenameToLaTexFile(plotSaveGG(plotErrorRateByHour(bxdat),paste0(thisName,"errorrate"),"eps"))
+      laTeXParagraphWrite()
+      if(length(baseline) > 0)
+      {
+        if(length(baselineTxDat$url) >1) 
+        {
 %>
 \subsubsection*{Request Status By Hour in Baseline}
 <%
-				plotWriteFilenameToLaTexFile(plotSaveGG(plotErrorRateByHour(baselineTxDat),paste0(thisName,"baseerrorrate"),"eps"))
-			}
-		}
-	}
+          plotWriteFilenameToLaTexFile(plotSaveGG(plotErrorRateByHour(baselineTxDat),paste0(thisName,"baseerrorrate"),"eps"))
+        }
+      }
+    }
 %>
 \subsection*{Request Sizes}
-
 <%
-if(noRequestBytes == FALSE){
+    if(noRequestBytes == FALSE){
 %>
 Mean: <%= mean(bxdat$requestbytes,na.rm=TRUE)/1000 %> kBytes
 <%
-	printPercentiles(bxdat$requestbytes/1000, dataName="Request Size (kBytes)")
-}
-else
-{
+      printPercentiles(bxdat$requestbytes/1000, dataName="Request Size (kBytes)")
+    }
+    else
+    {
 %>
 
 No request size data in logs
-
+      
 <%
-}
+    }
 %>
 \subsection*{Response Sizes}
 
 <%
-if(noResponseBytes == FALSE){
+    if(noResponseBytes == FALSE){
 %>
 Mean: <%= mean(bxdat$responsebytes,na.rm=TRUE)/1000 %> kBytes
 <%
- printPercentiles(bxdat$responsebytes/1000, dataName="Response Size (kBytes)")
-}
-else
-{
+      printPercentiles(bxdat$responsebytes/1000, dataName="Response Size (kBytes)")
+    }
+    else
+    {
 %>
-
+        
 No response size data in logs
-
+      
 <%
-}
+    }
 %>
 \clearpage
 %\pagebreak
 <%
-}
+  }
 }
 if((configVariableGet("config.useragent.generateFrequencies") == TRUE))
 {
+  message(Sys.time(), " beginning of user agent chapter")	
+  
 %>
 \clearpage
 \chapter[User Agent (Browser) Frequencies]{Browser Frequencies}
 <%
-    if(("useragent" %in% names(b))) {
+  if(("useragent" %in% names(b))) {
 %>
-  
+      
 Browser frequencies in this report are mainly useful for targeting application testing.  The objective must be to balance 
 test cost (number of browsers tested) againt population coverage. For that reason, the report specifies both a
 minimum browser family percentage and a cumulative percentage cutoff, for example not spending test 
 resources on browsers that represent less than 2 percent of the 
 population but aiming for test coverage of 95 percent of visitors.
-
+    
 A high occurrence of hits from User agent family "Other" is likely to indicate use of a monitoring request or heartbeat.  
-
+    
 <%
-minPercent = configVariableGet("config.useragent.minimumPercentage")
-maxPercentile = configVariableGet("config.useragent.maximumPercentile")
+    minPercent = configVariableGet("config.useragent.minimumPercentage")
+    maxPercentile = configVariableGet("config.useragent.maximumPercentile")
 %>
-
+      
 \begin{tabular}{l r }
 \hline \\
 Minimum Percentage for inclusion  & <%= minPercent %> \\
@@ -406,64 +414,66 @@ Cumulative Percentage Cutoff &  <%= maxPercentile %> \\
 Exclude "Other" User Agents  &  <%= configVariableGet("config.useragent.discardOther")  %> \\
 \hline 
 \end{tabular}
-
+    
 \section{User Agent Frequency by Browser Family}
 <%
-library(uaparserjs)
-uadf = ua_parse(a$useragent)
-if (configVariableGet("config.useragent.discardOther") == TRUE) 
+  library(uaparserjs)
+  uadf = ua_parse(as.character(a$useragent))
+  if (configVariableGet("config.useragent.discardOther") == TRUE) 
   uadf = uadf[uadf$ua.family != "Other",]
-
-uaFamily = aggregate(uadf$ua.family, by=list(uadf$ua.family),FUN=length)
-totalFamily = sum(uaFamily$x)
-uaFamily$pct = 100 * uaFamily$x/totalFamily
-uaFamily = uaFamily[order(uaFamily$pct, decreasing=TRUE),]
-uaFamily$cpct = cumsum(uaFamily$pct)
-
-names(uaFamily) = c("Browser Family", "Count", "Percent", "Cumulative Percentage")
-
-print(xtable(uaFamily[uaFamily$Percent > minPercent & uaFamily$`Cumulative Percentage`< maxPercentile,]), include.rownames=FALSE)
-
+    
+  uaFamily = aggregate(uadf$ua.family, by=list(uadf$ua.family),FUN=length)
+  totalFamily = sum(uaFamily$x)
+  uaFamily$pct = 100 * uaFamily$x/totalFamily
+  uaFamily = uaFamily[order(uaFamily$pct, decreasing=TRUE),]
+  uaFamily$cpct = cumsum(uaFamily$pct)
+    
+  names(uaFamily) = c("Browser Family", "Count", "Percent", "Cumulative Percentage")
+    
+  print(xtable(uaFamily[uaFamily$Percent > minPercent & uaFamily$`Cumulative Percentage`< maxPercentile,]), include.rownames=FALSE)
+    
 %>
-  \section{User Agent Frequency by Browser Family and Version}
+\section{User Agent Frequency by Browser Family and Version}
 <%
-uaVersion = aggregate(uadf$ua.family, by=list(uadf$ua.family, uadf$ua.major),FUN=length)
-totalVersion = sum(uaVersion$x)
-uaVersion$pct = 100 * uaVersion$x/totalVersion
-uaVersion = uaVersion[order(uaVersion$pct, decreasing=TRUE),]
-uaVersion$cpct = cumsum(uaVersion$pct)
-names(uaVersion) = c("Browser","Version", "Count", "Percent", "Cumulative Percentage")
-
-print(xtable(uaVersion[uaVersion$Percent > minPercent & uaVersion$`Cumulative Percentage`< maxPercentile,]), include.rownames=FALSE)
-    } else {
+    uaVersion = aggregate(uadf$ua.family, by=list(uadf$ua.family, uadf$ua.major),FUN=length)
+    totalVersion = sum(uaVersion$x)
+    uaVersion$pct = 100 * uaVersion$x/totalVersion
+    uaVersion = uaVersion[order(uaVersion$pct, decreasing=TRUE),]
+    uaVersion$cpct = cumsum(uaVersion$pct)
+    names(uaVersion) = c("Browser","Version", "Count", "Percent", "Cumulative Percentage")
+    
+    print(xtable(uaVersion[uaVersion$Percent > minPercent & uaVersion$`Cumulative Percentage`< maxPercentile,]), include.rownames=FALSE)
+  } else {
 %>
 Browser percentage report selected but no useragent data is present.  
 <%
-    }
+  }
 }
 if(configVariableGet("config.generateDiagnosticPlots") == TRUE)
 {
+  message(Sys.time(), " beginning of diagnostic plot chapter")	
+  
 %>
 \clearpage
 \chapter[Diagnostic Plots]{Diagnostic Plots}
 The graphs in this section compare aggregate measures over intervals to explore the relationships between response times, 
 parallelism levels and data rates for different types of transaction.  By default the values or 95th percentiles are calculated over ten minute intervals.  
-
+  
 \section{Does the 95th percentile response time respond to request rate?}
 <%
   b$one = 1
   if(length(baseline) > 0) 
   {
-	baseline$one = 1
-  savedBaseline$one = 1
-	laTeXParagraphWrite("Current (black) and Baseline (red) Data")
-	laTeXParagraphWrite()
-  	plotWriteFilenameToLaTexFile(plotSave(plotByRate(b$ts, b$elapsed, b$one, 0.95, "10 mins", xlab="request rate (10 minutes)",ylab="variance from overall 95th percentile response time (milliseconds)",baseTimeCol=savedBaseline$ts, baseDataCol=savedBaseline$elapsed, baseBaseRateCol=savedBaseline$one ),"overallresponsetimeshistogram3","eps"))
+    baseline$one = 1
+    savedBaseline$one = 1
+    laTeXParagraphWrite("Current (black) and Baseline (red) Data")
+    laTeXParagraphWrite()
+    plotWriteFilenameToLaTexFile(plotSave(plotByRate(b$ts, b$elapsed, b$one, 0.95, "10 mins", xlab="request rate (10 minutes)",ylab="variance from overall 95th percentile response time (milliseconds)",baseTimeCol=savedBaseline$ts, baseDataCol=savedBaseline$elapsed, baseBaseRateCol=savedBaseline$one ),"overallresponsetimeshistogram3","eps"))
   }
   else 
   {
-  laTeXParagraphWrite("Current Data")
-	laTeXParagraphWrite()
+    laTeXParagraphWrite("Current Data")
+    laTeXParagraphWrite()
     plotWriteFilenameToLaTexFile(plotSave(plotByRate(b$ts, b$elapsed, b$one, 0.95, "10 mins", xlab="request rate (10 minutes)",ylab="variance from overall 95th percentile response time (milliseconds)"),"overallresponsetimeshistogram2","eps"))
   }
 %>
@@ -527,6 +537,8 @@ parallelism levels and data rates for different types of transaction.  By defaul
 
 if((configVariableGet("config.generatePercentileRankings") == TRUE) & (length(baseline) > 0))
 {
+  message(Sys.time(), " beginning of transaction percentile ranking chapter")	
+  
 %>
 \begin{landscape}
 \chapter[Percentile Comparison]{Percentile Comparison}
@@ -552,6 +564,8 @@ Comparison & <%= f0(length(b$elapsed)) %> & <%= fd(min(b$ts)) %> & <%= fd(max(b$
 
 if(configVariableGet("config.generateServerSessionStats") == TRUE)
 { 
+message(Sys.time(), " beginning of server session statistics chapter")	
+
 %>
 \chapter[Server and Session Analysis]{Server and Session Analysis}
 
@@ -654,6 +668,7 @@ session counts by hour.
 	}
 }
 
+message(Sys.time(), " beginning of report parameters chapter")	
 
 %>
 \chapter[Report Parameters]{Report Parameters}
@@ -696,6 +711,8 @@ print(proc.time()-startCPU)
 print(packageDescription("WebAnalytics"))
 options(scipenOption)
 options(xtableOptions)
+message(Sys.time(), " end of report")	
+
 %>
 \end{verbatim}
 \end{scriptsize}

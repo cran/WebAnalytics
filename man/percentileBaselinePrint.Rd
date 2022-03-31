@@ -29,13 +29,23 @@ Greg Hunt <greg@firmansyah.com>
 }
 \examples{
 \dontshow{
+datd = paste0(tempdir(),"/minconfigtemp")
+unlink(datd)
+dir.create(paste0(tempdir(),"/minconfigtemp"))
+logfile = paste0(datd,"/log.log")
+fileConn = gzfile(system.file("extdata", "compressed.log", package = "WebAnalytics"))
+writeLines(readLines(fileConn),con=logfile)
+close(fileConn)
 # set the files directory name suitable for an R example
 configVariableSet("config.workdir", tempdir())
 }
-fileNameList = c(system.file("extdata", "compressed.log", package = "WebAnalytics"))
+
+fileNameList = logFileNamesGetAll(dataDirectory=datd)
+
 logdf = logFileListRead(fileNameList, 
           readFunction=logFileRead, 
           columnList=logFileFieldsGetIIS(fileNameList[[1]]))
+
 logbasedf = logFileListRead(fileNameList, 
           readFunction=logFileRead, 
           columnList=logFileFieldsGetIIS(fileNameList[[1]]))

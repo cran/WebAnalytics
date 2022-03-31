@@ -27,7 +27,18 @@ If the default read function is used the data frame will contain the standard co
 Greg Hunt <greg@firmansyah.com>
 }
 \examples{
-fileNameList = c(system.file("extdata", "compressed.log", package = "WebAnalytics"))
+\dontshow{
+datd = paste0(tempdir(),"/minconfigtemp")
+unlink(datd)
+dir.create(paste0(tempdir(),"/minconfigtemp"))
+logfile = paste0(datd,"/log.log")
+fileConn = gzfile(system.file("extdata", "compressed.log", package = "WebAnalytics"))
+writeLines(readLines(fileConn),con=logfile)
+close(fileConn)
+}
+
+fileNameList = logFileNamesGetAll(dataDirectory=datd)
+
 logdf = logFileListRead(fileNameList, 
           readFunction=logFileRead, 
           columnList=logFileFieldsGetIIS(fileNameList[[1]]))

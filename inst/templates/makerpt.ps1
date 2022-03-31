@@ -15,6 +15,8 @@ $dateTime = get-date -uformat "%Y%m%d%H%m%S"
 $brewFileName="brewdriver.$dateTime"
 $texFileNameStem = "$nameStem$dateTime"
 
+Remove-Item -Path Env:R_TESTS
+
 echo @"
 options(error=function(){traceback();quit(save="no",status=10)})
 e = new.env()

@@ -81,7 +81,7 @@ test_that("config default values are correct", {
   detach("package:WebAnalytics", unload=TRUE)
   library("WebAnalytics")
   
-  configVariablesLoad("minimum.config")
+  configVariablesLoad("variables.config")
   
   expect_equal(configVariableGet("config.generateGraphForTimeOver"), 10000)
   expect_equal(configVariableGet("config.generateServerSessionStats"), TRUE)
