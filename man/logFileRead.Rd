@@ -38,7 +38,7 @@ The columns in the file, in order.  Columns are:
 \code{requestbytes} \tab Optional \tab Number of bytes in the HTTP request \cr
 \code{elapsedms} \tab Optional \tab Request elapsed time in milliseconds \cr
 \code{elapsedus} \tab Optional \tab Request elapsed time in microseconds (will be rounded to milliseconds)\cr
-\code{elapseds} \tab Optional \tab Request elapsed time in seconds (not recommended due to lack of precision, will be expanded to milliseconds) \cr
+\code{elapseds} \tab Optional \tab Request elapsed time in seconds (not recommended, will be expanded to milliseconds) \cr
 \code{jsessionid} \tab Optional \tab User session identifier \cr
 \code{ignore*} \tab Optional \tab Columns with names starting with 'ignore' are dropped  
 }

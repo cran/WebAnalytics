@@ -551,7 +551,7 @@ the excluded transaction's response times are examined during development to ens
 \begin{tabular}{r l l l r r r r}
   & Count & Start Time & End Time & Dynamic & Static & Monitoring & Monitoring Delay\\
  \hline \\
-Baseline & <%= f0(length(baseline$elapsed)) %> & <%= fd(min(baseline$ts,na.rm=TRUE)) %> & <%= fd(max(baseline$tsna)) %> &  <%= f0(length(baseline[which(baseline$url!="Static Content Requests" & baseline$url!="Monitoring"),]$elapsed)) %> & <%= f0(length(baseline[which(baseline$url=="Static Content Requests"),]$elapsed)) %> & <%= f0(length(baseline[which(baseline$url=="Monitoring"),]$responsebytes)) %>  & <%= f2((sum(baseline[which(baseline$url=="Monitoring"),]$elapsed)/sum(baseline$elapsed))*100) %>\% \\
+Baseline & <%= f0(length(baseline$elapsed)) %> & <%= fd(min(baseline$ts,na.rm=TRUE)) %> & <%= fd(max(baseline$ts,na.rm=TRUE)) %> &  <%= f0(length(baseline[which(baseline$url!="Static Content Requests" & baseline$url!="Monitoring"),]$elapsed)) %> & <%= f0(length(baseline[which(baseline$url=="Static Content Requests"),]$elapsed)) %> & <%= f0(length(baseline[which(baseline$url=="Monitoring"),]$responsebytes)) %>  & <%= f2((sum(baseline[which(baseline$url=="Monitoring"),]$elapsed)/sum(baseline$elapsed))*100) %>\% \\
 Comparison & <%= f0(length(b$elapsed)) %> & <%= fd(min(b$ts)) %> & <%= fd(max(b$ts)) %> &  <%= f0(length(b[which(b$url!="Static Content Requests" & b$url!="Monitoring"),]$elapsed)) %> & <%= f0(length(b[which(b$url=="Static Content Requests"),]$elapsed)) %> & <%= f0(length(b[which(b$url=="Monitoring"),]$responsebytes)) %> & <%= f2((sum(b[which(b$url=="Monitoring"),]$elapsed)/sum(b$elapsed))*100) %>\% \\
 \hline
 \end{tabular}

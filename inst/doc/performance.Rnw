@@ -1,0 +1,9 @@
+%\VignetteIndexEntry{Performance Optimisation Guide}
+%\VignetteKeyword{Performance}
+%\VignetteKeyword{Web Applications}
+%\VignetteKeyword{Performance Optimisation}
+\documentclass{article}
+\usepackage{pdfpages}
+\begin{document}
+\includepdf[pages=-, fitpaper=true]{performanceoptimisation.pdf}
+\end{document}

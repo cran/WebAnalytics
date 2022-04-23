@@ -19,7 +19,8 @@
 #
 plotWriteFilenameToLaTexFile <-function (graphicFileName) 
 {
+  fn = gsub("\\\\","/",graphicFileName)
 #	cat(paste0("\\includegraphics[width=0.95\\textwidth,height=0.95\\textwidth]{", graphicFileName, "}\n"))
-  cat(paste0("\\includegraphics[width=0.95\\textwidth,height=0.63\\textwidth]{", graphicFileName, "}\n"))
+  cat(paste0("\\includegraphics[width=0.95\\textwidth,height=0.63\\textwidth]{", fn, "}\n"))
 }
 

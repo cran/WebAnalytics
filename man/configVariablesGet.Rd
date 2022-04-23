@@ -67,7 +67,14 @@ Multiple directory names can be coded here: \code{c("PRODMAW1/app1","PRODMAW2/ap
 }
 }
 \item{\code{config.current.columnList}}{
-The list of column names in the log file, for example \code{c("Apache", "elapsedus", "jsessionid")}.  See \code{\link{logFileRead}} for the list of valid column names.  The name \code{Apache} is an abbreviation for the Apache common log format: \code{c("userip", "ignored column 1", "username", "ApacheTimestamp", "url", "httpcode", "responsebytes")}
+The list of column names in the log file, for example 
+
+\code{c("Apache", "elapsedus", "jsessionid")}.  
+
+See \code{\link{logFileRead}} for the list of valid column names.  The name \code{Apache} is an abbreviation for the Apache common log format: 
+
+\code{c("userip", "ignored column 1", "username", "ApacheTimestamp", "url", "httpcode", "responsebytes")}
+
 \itemize{
 \item Required 
 \item No Default Value
@@ -95,7 +102,10 @@ The list of baseline log server-specific directories, usually a list of server n
 }
 }
 \item{\code{config.baseline.columnList}}{
-The list of columns to be read.  It is the baseline version of \code{config.current.columnList} 
+The list of columns to be read.  It is the baseline version of 
+
+\code{config.current.columnList} 
+
 \itemize{
 \item Must be specified if \code{config.readBaseline=TRUE}
 \item No Default Value

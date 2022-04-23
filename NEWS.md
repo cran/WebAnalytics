@@ -1,6 +1,13 @@
 # *News*
 
-# WebAnalytics 0.9.4 (2022)
+# WebAnalytics 0.9.5 (2022-04-24)
+
+* New: Added a cookbook PDF vignette about how to approach dealing with performance problems using this package.  
+* Bug: Fixed document formatting error identified by CRAN under the R development build.  
+* Bug: Fixed escaping of windows file paths
+* Rearranged sample data and associated tests to better fit under CRAN limitations (and still work) 
+
+# WebAnalytics 0.9.4 (2022-04-01)
 
 * New: Added TinyTex support to remove need for separate latex/xelatex installation.
 * New: Added progress messages to report template.

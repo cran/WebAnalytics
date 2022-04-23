@@ -21,16 +21,15 @@ laTeXEscapeString <-function (nameString)
 {
 	return(gsub("\\^","\\\textasciicircum{}",
 			gsub("~","\\\\textasciitilde{}",
-				gsub("\\}","\\\\\\}",
-					gsub("\\{","\\\\\\{",
-						gsub("_","\\\\_",
-							gsub("#","\\\\#",
-								gsub("\\$", "\\\\\\$",
-									gsub("&","\\\\&",
-										gsub("%","\\\\%", 
-											gsub("\\\\","\\textbackslash{}",
-#												URLencode(nameString)
-												nameString
+			     gsub("\\}","\\\\\\}",
+					   gsub("\\{","\\\\\\{",
+						    gsub("_","\\\\_",
+							    gsub("#","\\\\#",
+								    gsub("\\$", "\\\\\\$",
+									    gsub("&","\\\\&",
+										    gsub("%","\\\\%", 
+									        gsub("\\\\","\\\\textbackslash{}",
+												  nameString
 											)
 										)
 									)

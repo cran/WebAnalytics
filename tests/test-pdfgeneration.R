@@ -14,7 +14,10 @@ test_that("pdf is generated from sample data", {
   file.copy("./minimum.config", wkdir)
   expect_snapshot(system(paste0("cmd /c cd ", wkdir, "& powershell -f makerpt.ps1 minimum")))
   pdfName = list.files(wkdir,pattern=".*\\.pdf")[[1]]
-  system(paste0("cmd /c start ",wkdir,pdfName))
+  if(isInteractive())
+  {
+    system(paste0("cmd /c start ",wkdir,pdfName))
+  }
   unlink(wkdir,recursive=TRUE)
 })
 
@@ -30,7 +33,10 @@ test_that("pdf is generated using pdfGenerate", {
   file.copy("./minimum.config", wkdir)
   expect_snapshot(pdfGenerate(workDir = wkdir,configFile="minimum.config"))
   pdfName = list.files(wkdir,pattern=".*\\.pdf")[[1]]
-  system(paste0("cmd /c start ",wkdir,pdfName))
+  if(isInteractive())
+  {
+    system(paste0("cmd /c start ",wkdir,pdfName))
+  }
   unlink(wkdir,recursive=TRUE)
 })
 
