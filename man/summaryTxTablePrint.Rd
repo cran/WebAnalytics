@@ -30,10 +30,11 @@ unlink(datd)
 dir.create(paste0(tempdir(),"/minconfigtemp"))
 logfile = paste0(datd,"/log.log")
 fileConn = gzfile(system.file("extdata", "compressed.log", package = "WebAnalytics"))
-writeLines(readLines(fileConn),con=logfile)
+writeLines(readLines(fileConn,n=100),con=logfile)
 close(fileConn)
 # set the files directory name suitable for an R example
 configVariableSet("config.workdir", tempdir())
+setDTthreads(threads=1)
 }
 f0<-function(n)
 {

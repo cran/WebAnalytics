@@ -95,18 +95,19 @@
     \vskip 40\p@
   }}
 
-\renewcommand\section{\@startsection {section}{1}{\z@}%
+
+\renewcommand\section{\@startsection{section}{1}{\z@}%
                                    {-3.5ex \@plus -1ex \@minus -.2ex}%
                                    {2.3ex \@plus.2ex}%
-                                   {\normalfont\Large\bfseries\schemedarkcolour}}
+                                   {\fontencoding{T1}\fontspec{QTWeise.otf}\selectfont\interlinepenalty\@M \huge \bfseries\schemedarkcolour}}
 \renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
                                      {-3.25ex\@plus -1ex \@minus -.2ex}%
                                      {1.5ex \@plus .2ex}%
-                                     {\normalfont\large\bfseries\schemedarkcolour}}
+                                     {\fontencoding{T1}\fontspec{QTWeise.otf}\selectfont\interlinepenalty\@M \Large\bfseries\schemedarkcolour}}
 \renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
                                      {-3.25ex\@plus -1ex \@minus -.2ex}%
                                      {1.5ex \@plus .2ex}%
-                                     {\normalfont\normalsize\bfseries\schemedarkcolour}}
+                                     {\fontencoding{T1}\fontspec{QTWeise.otf}\selectfont\interlinepenalty\@M \large\bfseries\schemedarkcolour}}
 
 \usepackage{lastpage}
 \usepackage[usenames,dvipsnames]{color}
@@ -196,6 +197,7 @@
 
 \usepackage{booktabs}
 \usepackage{pdflscape}
+%\usepackage{epstopdf}
 \usepackage{float}
 \usepackage{rotating}
 
@@ -211,6 +213,8 @@
 
 \newlength{\urlshort@lz}
 \newlength{\urlshort@lzz}
+\newlength{\longtext@lz}
+
 \newcounter{urlshorten@num}
 
 \newcommand\urlshorten[1]{
@@ -237,7 +241,7 @@
 }
 
 \newcommand\urlshorten@three[2]{%
-% get the strng width 
+% get the string width 
 \settowidth{\urlshort@lz}{#1}%
 %
 % if the string width greater than the page text
@@ -274,13 +278,24 @@
 
 \newcommand\urlshortenconditionaltext[1]{
 \ifnum\value{urlshorten@num}>0
-#1
+\emitlongtext{#1}
 \else
 %counter is zero
 \fi
 }
 
-% ...
+
+\newcommand\emitlongtext[1]{
+% get the string width 
+\settowidth{\longtext@lz}{#1}%
+\ifdim\linewidth > \longtext@lz%
+#1\\%
+\else%
+\StrLeft{#1}{80}\\
+\StrGobbleLeft{#1}{80}[\truncstr]%
+\emitlongtext{\truncstr}%
+\fi%
+}% ...
 
 %
 % Put hyperref package in as late as possible 

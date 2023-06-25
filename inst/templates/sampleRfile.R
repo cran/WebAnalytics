@@ -70,6 +70,20 @@ if(any(names(b) == "responsebytes"))
   noResponseBytes = TRUE
 }
 
+
+brokenURLs = which(nchar(b$url) > configVariableGet("config.longurls.threshold"))
+if(length(brokenURLs)>0)
+{
+  brokenURLList = b[brokenURLs,]$url
+  message(Sys.time()," Extremely long URLs (", length(brokenURLs), " over 1000 characters) found and remapped to Over Long URL <number>")
+  lapply(brokenURLList, FUN=message)
+  for(u in 1:length(brokenURLs))
+  {
+    b[brokenURLs[u],"url"] = paste("Over Long URL",u)
+  }
+}
+rm(brokenURLs)
+
 a = b	
 
 #save(a,file="b.RData")
@@ -99,6 +113,20 @@ if(configVariableGet("config.readBaseline") == TRUE)
   {
     baseline$requestbytes = 0 # not in this log, probably Apache
   }
+
+  baselineBrokenURLs = which(nchar(baseline$url) > configVariableGet("config.longurls.threshold"))
+  if(length(baselineBrokenURLs)>0)
+  {
+    baselineBrokenURLList = baseline[baselineBrokenURLs,]$url
+    message(Sys.time()," Extremely long URLs (",length(baselineBrokenURLs)," over 1000 characters) found in baseline data and remapped to ERROR URL <number>")
+    lapply(baselineBrokenURLList, FUN=message)
+    for(u in 1:length(baselineBrokenURLs))
+    {
+      baseline[baselineBrokenURLs[u],"url"] = paste("Over Long URL",u)
+    }
+  }
+  rm(baselineBrokenURLs)
+  
   
 } else {
   baseline = data.frame()

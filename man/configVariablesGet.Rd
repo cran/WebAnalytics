@@ -204,6 +204,13 @@ The security classification of the document.  Displayed on the default first pag
 \item Default Value: Commercial-In-Confidence
 }
 }
+\item{\code{config.longurls.threshold}}{
+The length in characters of a URL above which the URL text is replaced by a placeholder and the URL content is logged. Increasing this number will allow processing of longer URL text, but can lead to problems in LaTeX's processing the file. 
+\itemize{
+\item Optional
+\item Default Value: 1000
+}
+}
 }
 }
 \value{

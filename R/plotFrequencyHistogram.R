@@ -24,7 +24,7 @@ plotFrequencyHistogram <-function (theDf)
 	# this is here just to suppress the warning about elapsed (in the data frame construction) being a global variable.  
 	elapsed=0
 	
-	if(class(theDf) != "data.frame")
+	if(!inherits(theDf,"data.frame"))
 	{
 		d = data.frame(elapsed = theDf)
 	} 

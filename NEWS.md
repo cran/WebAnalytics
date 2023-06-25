@@ -1,11 +1,25 @@
 # *News*
 
+# WebAnalytics 0.9.8 (2023-06-25)
+
+Allowable elapsed time of examples has been halved since 2022.  Parallelism > 2 
+not allowed in examples.  Invisible changes to examples.
+
+# WebAnalytics 0.9.7 (2023-06-25)
+
+Rewrite of parts of the performance analysis vignette PDF.   
+
+# WebAnalytics 0.9.6 (2022-05-17)
+
+* Bug: URLs with uninterrupted (no spaces or punctuation) strings of more than 484 characters would crash LaTeX.  Not likely to be seen in production but not impossible.  Corrected the LaTeX document class URL truncation macros to break the line every 90 characters (punch cards are not quite dead, 132 was too wide and 80 too short).  This means that wrapping does not occur in that text now, but it is guaranteed to fit on the page.  LaTeX macros (\emph{something} or \textbf{something} for example) embedded in the string are not guaranteed to work if they fall across the split and I do not know why, but this is not an issue for the report template which only uses this for URL strings, its just something to keep in mind.  
+* Bug: URLs 6k characters in length (seen in logs) crash LaTeX.  The brew/R report template has been updated to replace huge URLs with a short numeric placeholder and list the content of the URL in the log.  Huge URLs are usually an error or attack of some kind so this seems reasonable balance of usefulness, that is: removing what crashes LaTeX being more important than reporting rare giant URLs in an easily understood form.  
+
 # WebAnalytics 0.9.5 (2022-04-24)
 
 * New: Added a cookbook PDF vignette about how to approach dealing with performance problems using this package.  
 * Bug: Fixed document formatting error identified by CRAN under the R development build.  
 * Bug: Fixed escaping of windows file paths
-* Rearranged sample data and associated tests to better fit under CRAN limitations (and still work) 
+* New; Rearranged sample data and associated tests to better fit under CRAN limitations (and still work) 
 
 # WebAnalytics 0.9.4 (2022-04-01)
 

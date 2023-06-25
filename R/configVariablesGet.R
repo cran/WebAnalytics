@@ -27,7 +27,7 @@ configVariablesLoad<-function(fileName="report.config")
 						"config.generateServerSessionStats", "config.generatePercentileRankings", "config.fix.data", "config.fix.current.data", "config.fix.baseline.data",
 						"config.generateTransactionDetails", "config.generateDiagnosticPlots", "config.workdir", "config.author",
 						"config.securityclass","config.useragent.generateFrequencies", "config.useragent.minimumPercentage", "config.useragent.maximumPercentile",
-						"config.useragent.discardOther")
+						"config.useragent.discardOther", "config.longurls.threshold")
 
 	fn = normalizePath(fileName)
 	configFileExists = file.exists(fn)
@@ -110,6 +110,10 @@ configVariablesLoad<-function(fileName="report.config")
 	if(!is.element("config.securityClass", loadedNames))
 	{
 	  assign("config.securityClass", "Commercial-In-Confidence", envir = .configEnv)
+	}
+	if(!is.element("config.longurls.threshold", loadedNames))
+	{
+	  assign("config.longurls.threshold", 1000, envir = .configEnv)
 	}
 	
 	if(configFileExists)
