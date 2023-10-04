@@ -48,10 +48,13 @@ plotByRate(timecol,
   the plot title	
   }
   \item{baseTimeCol}{
-	}
+  Use this parameteter and the associated \code{baseDataCol} as an alternative time base and data to summarise the data.
+	} 
   \item{baseDataCol}{
+  Data values associated with the rate column above.  
 	}
   \item{baseBaseRateCol}{
+  Rate column for the prevoious two columns.   
 	}
   \item{outlierPercentile}{
   discard data above this percentile

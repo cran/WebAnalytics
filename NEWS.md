@@ -1,5 +1,9 @@
 # *News*
 
+# WebAnalytics 0.9.9 (2023-10-04)
+
+Package level documentation page missing - re-added.  Corrected notes that are being generated for documentation.
+
 # WebAnalytics 0.9.8 (2023-06-25)
 
 Allowable elapsed time of examples has been halved since 2022.  Parallelism > 2 
