@@ -24,8 +24,6 @@ configVariablesLoad(fileName=reportParameterFileName)
 \pagebreak
 <%
 
-
-
 fixDataProcedure<-function(b) { return(b) }
 
 if(configVariableIs("config.fix.data"))
@@ -41,11 +39,16 @@ if(configVariableIs("config.fix.current.data"))
 fileNames = logFileNamesGetLast(dataDirectory=configVariableGet("config.current.dataDir"),directoryNames=configVariableGet("config.current.dirNames"))
 
 b = fixDataProcedure(
-  logFileListRead(
-    fileNames
-    ,columnList=configVariableGet("config.current.columnList")
-  )
+ logFileListRead(
+   fileNames
+   ,columnList=configVariableGet("config.current.columnList")
+ )
 )
+
+if(nrow(b) < 1)
+{
+  stop("no data read")
+}
 
 message(Sys.time(), " read data")	
 
@@ -93,20 +96,30 @@ baselineFileNames = NULL
 
 if(configVariableGet("config.readBaseline") == TRUE)
 {
-  if(configVariableIs("config.fix.baseline.data"))
+#   load("reqtest20250630.Rdata")
+  
+#   baseline = qq
+#   rm(qq)
+  
+  
+ if(configVariableIs("config.fix.baseline.data"))
+ {
+   fixDataProcedure=configVariableGet("config.fix.baseline.data")
+ }
+  
+  
+ baselineFileNames = logFileNamesGetLast(dataDirectory=configVariableGet("config.baseline.dataDir"),directoryNames=configVariableGet("config.baseline.dirNames"))
+ 
+ baseline = fixDataProcedure(
+   logFileListRead(
+     baselineFileNames
+     ,columnList=configVariableGet("config.baseline.columnList")
+   )
+ )
+  if(nrow(baseline) < 1)
   {
-    fixDataProcedure=configVariableGet("config.fix.baseline.data")
+    stop("no baseline data read")
   }
-  
-  
-  baselineFileNames = logFileNamesGetLast(dataDirectory=configVariableGet("config.baseline.dataDir"),directoryNames=configVariableGet("config.baseline.dirNames"))
-  
-  baseline = fixDataProcedure(
-    logFileListRead(
-      baselineFileNames
-      ,columnList=configVariableGet("config.baseline.columnList")
-    )
-  )
   message(Sys.time(), " read baseline")	
   
   if(length(baseline$responsebytes) > 0 & length(baseline$requestbytes) < 1)
@@ -131,6 +144,8 @@ if(configVariableGet("config.readBaseline") == TRUE)
 } else {
   baseline = data.frame()
 }
+
+
 
 f0<-function(n)
 {
@@ -317,7 +332,7 @@ if(configVariableGet("config.generateTransactionDetails") == TRUE)
 %>
 \hypertarget{<%=digest::digest(thisName,algo="sha1")%>}{}
 \section[<%=texname%>]{\urlshorten{<%=texname%>}}
-\urlshortenconditionaltext{Path shortened in section heading, full text is:\\\url{<%=texname%>}}
+\urlshortenconditionaltext{Path shortened in section heading, full text is: <%=texname%>}
     
 \paragraph{}Requests: <%=length(bxdat$elapsed)%> (<%=strftime(min(bxdat$ts,na.rm=TRUE))%> to <%=strftime(max(bxdat$ts,na.rm=TRUE))%>)
 <%
@@ -627,10 +642,11 @@ session counts by hour.
 		plotWriteFilenameToLaTexFile(plotSave(plot(sort(table(a$jsessionid)),main="Session Length Distribution",xlab="Session",ylab="Request Count"),"sessionlengths","eps"))
 		
 		b2 = a[order(a$ts),]
-		slices = cut(b2$ts, "30 mins")
-		sl = as.character(slices)
-		slc = as.POSIXct(sl)
-		b2$bucket = slc
+		b2$bucket = posixctCut(b2$ts, "30 mins")
+#		slices = cut(b2$ts, "30 mins")
+#		sl = as.character(slices)
+#		slc = as.POSIXct(sl)
+#		b2$bucket = slc
 		sess = (aggregate(b2$jsessionid,list(b2$bucket),  FUN=function(x){length(unique(x))}))
 
 		p = ggplot(sess, aes(x=x)) 

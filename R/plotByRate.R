@@ -27,7 +27,8 @@ plotByRate<-function(timecol, datacol, baseratecol, percentile, breaksString, ba
 		overalldf = rbind(ddf,bdf)
 		
 		# intervals
-		tens = cut(overalldf$time,breaks=brkstring)
+#		tens = cut(overalldf$time,breaks=brkstring)
+		tens = posixctCut(overalldf$time, brkstring)
 		# work out the baseline percentile in the data values of interest 
 		baseline = quantile(dcol,c(pctile),type=1,na.rm=TRUE)[1]
 		# aggregate the variation using the time base that corresponds with the data set and sum the background value over the interval

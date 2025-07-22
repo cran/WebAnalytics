@@ -128,7 +128,7 @@
 %
 % Header
 %
-\def\@headerlogo{\includegraphics[height=2cm]{logo.eps}}
+\def\@headerlogo{\includegraphics[height=1.5cm,keepaspectratio]{logo.eps}}
 \def\@headertext{\raisebox{27pt}{\fontencoding{T1}\fontspec{QTWeise.otf}\fontsize{13}{15}\selectfont{\schemedarkcolour{}{ \@projectname{}}}}}
 \def\@myheaderright{\@headertext\hfill\@headerlogo}
 \def\@myheaderleft{\@headerlogo\hfill\@headertext}
@@ -277,25 +277,25 @@
 }
 
 \newcommand\urlshortenconditionaltext[1]{
-\ifnum\value{urlshorten@num}>0
-\emitlongtext{#1}
-\else
-%counter is zero
-\fi
+	\ifnum\value{urlshorten@num}>0%
+	\emitlongtext{#1}%
+	\else%
+	%counter is zero and the string already fitted in urlshorten
+	\fi%
 }
 
-
 \newcommand\emitlongtext[1]{
-% get the string width 
-\settowidth{\longtext@lz}{#1}%
-\ifdim\linewidth > \longtext@lz%
-#1\\%
-\else%
-\StrLeft{#1}{80}\\
-\StrGobbleLeft{#1}{80}[\truncstr]%
-\emitlongtext{\truncstr}%
-\fi%
-}% ...
+	% get the string width 
+	\settowidth{\longtext@lz}{#1}%
+	\ifdim\linewidth > \longtext@lz%
+	\texttt{\textit{#1}}%
+	\else%
+	\texttt{\textit{\StrLeft{#1}{80}}}\newline%
+	\expandarg%
+	\StrGobbleLeft{#1}{80}[\truncstr]%
+	\emitlongtext{\truncstr}%
+	\fi%
+}%
 
 %
 % Put hyperref package in as late as possible 

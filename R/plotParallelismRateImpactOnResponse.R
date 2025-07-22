@@ -43,7 +43,8 @@ plotParallelismRateImpactOnResponse<-function(b, intervalLength = 600,
 	o = ISOdatetime(1970,1,1,0,0,0)
 	# sequence by seconds
 	intervalbase = min(b$ts):max(b$ts)
-	intervals = sort(unique(cut(as.POSIXct(intervalbase,origin=o),breaks=breaksString)))
+	#intervals = sort(unique(cut(as.POSIXct(intervalbase,origin=o),breaks=breaksString)))
+	intervals = sort(unique(posixctCut(as.POSIXct(intervalbase,origin=o), breaksString)))
 	intervalStart = as.POSIXct(intervals[1],origin=o)
 	meanResponse = list()
 	meanParallelism = list()

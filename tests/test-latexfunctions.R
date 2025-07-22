@@ -8,5 +8,5 @@ test_that("pargraph is written", {
 
 test_that("escape string works", {
   expect_equal(laTeXEscapeString("~!@#$%^&*(){}[]_-|\\"),
-               "\\textasciitilde{}!@\\#\\$\\%\textasciicircum{}\\&*()\\{\\}[]\\_-|\\textbackslash\\{\\}")
+               "\\textasciitilde{}!@\\#\\$\\%\\textasciicircum{}\\&*()\\{\\}[]\\_\\-|\\textbackslash{}")
 })

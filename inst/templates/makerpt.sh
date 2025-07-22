@@ -33,7 +33,7 @@ quit(save="no",status=0)
 
 End-of-script
 
-rscript $brewFileName
+Rscript $brewFileName
 
 rc=$?
 

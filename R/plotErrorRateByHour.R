@@ -21,7 +21,6 @@ if(getRversion() >= "2.15.1") utils::globalVariables(c("ts","status"))
 
 plotErrorRateByHour <-function (dataFrame) 
 {
-	
   nhoursperbreak = 1
   nhours = difftime(max(dataFrame$ts,na.rm=TRUE), min(dataFrame$ts, na.rm=TRUE), units = "hours")
   if(nhours > 24)
@@ -29,8 +28,11 @@ plotErrorRateByHour <-function (dataFrame)
     nhoursperbreak = as.integer(nhours/24)+1
   }
   
-  p = ggplot(dataFrame,aes(as.POSIXct(cut(ts,breaks="hour")),fill=status)) 
-	p = p + geom_histogram(binwidth=3600) 
+  newdf = data.frame(ts = posixctCut(dataFrame$ts, "hour"), status = dataFrame$status)
+  
+  #  p = ggplot(dataFrame,aes(as.POSIXct(c ut(ts,breaks="hour")),fill=status)) 
+  p = ggplot(newdf,aes(x=ts, fill=status))
+	p = p + geom_histogram(binwidth=3600, show.legend = TRUE) 
 	p = p + scale_x_datetime(breaks = date_breaks(paste(nhoursperbreak,"hour")))
 	p = p + theme(axis.text.x = element_text(angle=60,vjust = 1.1, hjust=1.1))
 	p = p + ylab("Request Rate and Status by Hour") 

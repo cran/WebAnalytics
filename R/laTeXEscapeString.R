@@ -19,26 +19,23 @@
 #
 laTeXEscapeString <-function (nameString) 
 {
-	return(gsub("\\^","\\\textasciicircum{}",
-			gsub("~","\\\\textasciitilde{}",
-			     gsub("\\}","\\\\\\}",
-					   gsub("\\{","\\\\\\{",
-						    gsub("_","\\\\_",
-							    gsub("#","\\\\#",
-								    gsub("\\$", "\\\\\\$",
-									    gsub("&","\\\\&",
-										    gsub("%","\\\\%", 
-									        gsub("\\\\","\\\\textbackslash{}",
-												  nameString
-											)
-										)
-									)
-								)
-							)
-						)
-					)
-				)
-			)
-		)
-	)
+  
+  characterList = strsplit(nameString, "")[[1]]
+  
+  escapedChars = strsplit("-_#$&%{}", "")[[1]]
+  
+  recordFn = function(ch){
+    if(ch %in% escapedChars)
+      return(paste0("\\", ch))
+    if( ch == "~")
+      return("\\textasciitilde{}")
+    if( ch == "^")
+      return("\\textasciicircum{}")
+    if( ch == "\\")
+      return("\\textbackslash{}")
+    return(ch)
+  }
+  
+return ( paste(unlist(lapply(characterList, FUN=recordFn)), collapse=""))
+
 }

@@ -97,7 +97,7 @@ logFileRead <-function(fileName, columnList=c("MSTimestamp", "clientip", "url", 
 	                              col.names = unlist(wkColumnList),
 										            colClasses = unlist(wkTypeList),
 										            na.strings="-",
-										            stringsAsFactors = TRUE), 
+										            stringsAsFactors = FALSE), 
 	
 #	logRecs = withCallingHandlers(
 	
