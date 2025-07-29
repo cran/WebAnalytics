@@ -18,7 +18,7 @@
 #
 #
 
-logFileRead <-function(fileName, columnList=c("MSTimestamp", "clientip", "url", "httpcode", "elapsed"), logTimeZone = "", timeFormat = "") 
+logFileRead <-function(fileName, columnList=c("MSTimestamp", "clientip", "url", "httpcode", "elapsed"), logTimeZone="", timeFormat="") 
 {
 	columnDefinitions = data.frame(
 		name =    c("ApacheTimestamp", "MSTimestamp", "servername", "serverip",  "httpop",    "url",       "parms",     "port",    "username",  "userip",    "useragent", "httpcode", "windowscode", "windowssubcode",   "responsebytes", "requestbytes", "elapsedms", "elapsedus", "elapseds", "ignore",    "jsessionid"),
@@ -26,7 +26,7 @@ logFileRead <-function(fileName, columnList=c("MSTimestamp", "clientip", "url", 
 		minimum = c(FALSE,             FALSE,         FALSE,        FALSE,       FALSE,       TRUE,        FALSE,       FALSE,     FALSE,        FALSE,      FALSE,         TRUE,       FALSE,         FALSE,              FALSE,           FALSE,          FALSE,       FALSE,       FALSE,      FALSE,        FALSE)                                                   
 	)
 	
-	minimumColumnList = columnDefinitions[columnDefinitions$minimum,]$name
+	minimumColumnList = columnDefinitions[columnDefinitions$minimum, ]$name
 	baseColumnList = columnDefinitions$name
 	
 	# check that the minimum column set is present 
@@ -37,19 +37,19 @@ logFileRead <-function(fileName, columnList=c("MSTimestamp", "clientip", "url", 
 		stop("specified column set does not include a timestamp: ApacheTimestamp or MSTimestamp")
 	}
 	if(!(is.element("elapsedms", columnList) | is.element("elapseds", columnList)| is.element("elapsedus", columnList))) {
-		stop("specified column set does not include a duration: elapsedms, elaspedus, elapseds")
+		stop("specified column set does not include a duration: elapsedms, elapsedus, elapseds")
 	}
 	
 	# check that the elements outside of the minimum set are either in the extended set or have names of the format "ignore.*"
 	ignores = setdiff(columnList, baseColumnList)
 	for(i in ignores) {	
-		if(substr(i,1,6) != "ignore")
+		if(substr(i, 1, 6) != "ignore")
 		{
 			stop("column name \"",i,"\" is neither a defined column name nor begins with the text 'ignore'")
 		}
 	}
 	# ensure that all columns to be dropped are here
-	ignores = append(ignores, grep( "ignore.*",columnList, value=TRUE))
+	ignores = append(ignores, grep("ignore.*",columnList, value=TRUE))
 
 	wkTypeList = list()
 	wkColumnList = list()
@@ -81,24 +81,75 @@ logFileRead <-function(fileName, columnList=c("MSTimestamp", "clientip", "url", 
 			}
 		}
 	}
-	#message("column list being read")
-	#message(wkColumnList)
-	# logRecs = withCallingHandlers(read.table(fileName, 
-	#                               header=FALSE, 
-	#                               quote="\"'", 
-	#                               col.names = wkColumnList,
-	# 									            colClasses = wkTypeList,
-	# 									            na.strings="-",
-	# 									            stringsAsFactors = TRUE), # more minimising the memory footprint
-	logRecs = withCallingHandlers(data.table::fread(file=fileName,
-	                              header=FALSE,
-	                              #sep=" ",
-	                              # quote="\"'",
-	                              col.names = unlist(wkColumnList),
-										            colClasses = unlist(wkTypeList),
-										            na.strings="-",
-										            stringsAsFactors = FALSE), 
+
+
+errorFunction=function(e)
+{
+	message("")
+	message("Error Trapped reading data file:")
+	message(toString(e))
+	message("Columns: ",toString(wkColumnList))
+	message("Types: ",toString(wkTypeList))
+	colCount = length(wkColumnList)
+	fieldCounts = count.fields(fileName)
+	distinctCountRows = which(!duplicated(fieldCounts))
+	if(length(distinctCountRows) > 1)
+	{
+		message("Different Field Counts (", toString(unique(fieldCounts)),") found in file ", fileName, " first instances only shown")
+		for(r in distinctCountRows)
+		{
+			message("Row: ", r)
+			recs = readLines(fileName, n=r+1)
+			message(recs[r])
+		}
+	} else {
+		if(any(length(wkColumnList) != fieldCounts))
+		{
+			message("The number of fields in the file (", toString(unique(fieldCounts)), ") does not match the number implied by the column list (", length(wkColumnList), ")")
+		}
+	}
+	stop(e)
+}
+
+	readconfig = configVariableGet("config.read.function")
+
+	if(readconfig == "data.table")
+	{
+		dataTableIsPresent = requireNamespace("data.table")
+		if(!dataTableIsPresent)
+		{
+			readconfig = "core"
+			warning("data.table package not available, using read.table")
+		}
+	}
+
+	if(readconfig == "core")
+	{
+		logRecs = withCallingHandlers(read.table(fileName, 
+	                                	header=FALSE, 
+#	                                	quote="\"'", 
+	                                	col.names = wkColumnList,
+ 										colClasses = wkTypeList,
+	 									na.strings="-",
+	 									stringsAsFactors = FALSE), # more minimising the memory footprint
+									error = errorFunction)
+	} else {
+		if(readconfig == "data.table")
+		{
+			logRecs = withCallingHandlers(data.table::fread(file=fileName,
+	        		                      header=FALSE,
+	                		              #sep=" ",
+	                        		      # quote="\"'",
+	                            			col.names = unlist(wkColumnList),
+										    colClasses = unlist(wkTypeList),
+										    na.strings="-",
+										    stringsAsFactors = FALSE),
+											error=errorFunction) 
+		} else {
+			stop(paste("config.read.function", readconfig, "must be either \"core\" or \"data.table\" "))
+		}
 	
+	}
 #	logRecs = withCallingHandlers(
 	
 	# readrcolTypeSpec = ""
@@ -119,35 +170,7 @@ logFileRead <-function(fileName, columnList=c("MSTimestamp", "clientip", "url", 
 	# 									                       na = c("-"),
 	# 									                       comment = "#",
 	# 									                       progress=FALSE)
-										                                          error=function(e)
-										{
-											message("")
-											message("Error Trapped reading data file:")
-											message(toString(e))
-											message("Columns: ",toString(wkColumnList))
-											message("Types: ",toString(wkTypeList))
-											colCount = length(wkColumnList)
-											fieldCounts = count.fields(fileName)
-											distinctCountRows = which(!duplicated(fieldCounts))
-											if(length(distinctCountRows) > 1)
-											{
-												message("Different Field Counts (", toString(unique(fieldCounts)),") found in file ", fileName, " first instances only shown")
-												for(r in distinctCountRows)
-												{
-													message("Row: ", r)
-													recs = readLines(fileName, n=r+1)
-													message(recs[r])
-												}
-											} else {
-												if(any(length(wkColumnList) != fieldCounts))
-												{
-													message("The number of fields in the file (", toString(unique(fieldCounts)), ") does not match the number implied by the column list (", length(wkColumnList), ")")
-												}
-											}
-											#return()
-											stop(e)
-										}
-				)
+										                                          
 			
 	#print(wkTypeList)
 #	warning(readr::problems(logRecs))
@@ -164,26 +187,26 @@ logFileRead <-function(fileName, columnList=c("MSTimestamp", "clientip", "url", 
 	#   the data frame
 	#
 	
-	ignores = append(ignores, grep( "ignore.*",names(logRecs), value=TRUE))
+	ignores = append(ignores, grep("ignore.*", names(logRecs), value=TRUE))
 	
 	# drop them asap to hold down the memory footprint 
 	logRecs = logRecs[,!(names(logRecs) %in% ignores)]
 	
-	if(is.element("elapsedms",columnList)){
+	if(is.element("elapsedms", columnList)){
 		logRecs$elapsed = logRecs$elapsedms
-		ignores = append(ignores,"elapsedms")
+		ignores = append(ignores, "elapsedms")
 	}
 	if(is.element("elapsedus",columnList)){
-		logRecs$elapsed = logRecs$elapsedus/1000
-		ignores = append(ignores,"elapsedus")
+		logRecs$elapsed = logRecs$elapsedus / 1000
+		ignores = append(ignores, "elapsedus")
 	}
-	if(is.element("elapseds",columnList)){
-		logRecs$elapsed = logRecs$elapseds*1000
-		ignores = append(ignores,"elapseds")
+	if(is.element("elapseds", columnList)){
+		logRecs$elapsed = logRecs$elapseds * 1000
+		ignores = append(ignores, "elapseds")
 	}
 	
 	if(is.element("jsessionid", columnList)){
-		logRecs$serverid = sub("[^:]*:(.*)","\\1", logRecs$jsessionid)
+		logRecs$serverid = sub("[^:]*:(.*)", "\\1", logRecs$jsessionid)
 	}
 	
 	if(isMSTimestamp) {
@@ -192,7 +215,7 @@ logFileRead <-function(fileName, columnList=c("MSTimestamp", "clientip", "url", 
 		}
 		
 		if(logTimeZone != "") {
-			logRecs["ts"] = as.POSIXct(as.POSIXlt(as.POSIXct(paste(logRecs$msdatepart,logRecs$mstimepart), tz=logTimeZone, timeFormat ),tz=""))
+			logRecs["ts"] = as.POSIXct(as.POSIXlt(as.POSIXct(paste(logRecs$msdatepart, logRecs$mstimepart), tz=logTimeZone, timeFormat ), tz=""))
 		}
 		else {
 			logRecs["ts"] = as.POSIXct(paste(logRecs$msdatepart, logRecs$mstimepart), tz="", timeFormat )
@@ -208,7 +231,7 @@ logFileRead <-function(fileName, columnList=c("MSTimestamp", "clientip", "url", 
 		}
 
 		if(logTimeZone != "") {
-			logRecs["ts"] = as.POSIXct(as.POSIXlt(as.POSIXct(logRecs$apachetimestamp, tz=logTimeZone, timeFormat),tz=""))
+			logRecs["ts"] = as.POSIXct(as.POSIXlt(as.POSIXct(logRecs$apachetimestamp, tz=logTimeZone, timeFormat), tz=""))
 		}
 		else {
 			logRecs["ts"] = as.POSIXct(logRecs$apachetimestamp, "", timeFormat)

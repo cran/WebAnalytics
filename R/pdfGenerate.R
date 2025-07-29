@@ -17,8 +17,14 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 #
-pdfGenerate<-function(configFile, templateFile="sampleRfile.R", workDir = ".")
+pdfGenerate <- function(configFile, templateFile="sampleRfile.R", workDir = ".")
 {
+  tinyTexPresent = requireNamespace("tinytex")
+  if(!tinyTexPresent) 
+  {
+    stop("tinytex not available")
+  }
+
   if(!dir.exists(workDir))
   {
     stop(paste("Work directory", workDir, "not found"))
@@ -27,13 +33,13 @@ pdfGenerate<-function(configFile, templateFile="sampleRfile.R", workDir = ".")
   oldwkdir = setwd(workDir)
   if(missing(configFile))
   {
-    configFileList = list.files(pattern=".*\\.config",no..=TRUE,ignore.case = TRUE)
+    configFileList = list.files(pattern=".*\\.config", no..=TRUE, ignore.case = TRUE)
     if(length(configFileList) > 1)
     {
       setwd(oldwkdir)
       str(configFileList)
       
-      stop(paste("Multiple config files:", paste(configFileList,collapse=","),"in directory", getwd()))
+      stop(paste("Multiple config files:", paste(configFileList, collapse=","), "in directory", getwd()))
     }
     if(length(configFileList) < 1)
     {
@@ -56,26 +62,26 @@ pdfGenerate<-function(configFile, templateFile="sampleRfile.R", workDir = ".")
 
   dateString = format(Sys.time(), format="%Y%m%d%H%M%S")
   
-  nameStem = sub("(.*)+\\.config","\\1",configFile, ignore.case = TRUE)
+  nameStem = sub("(.*)+\\.config", "\\1", configFile, ignore.case = TRUE)
   fileNamePrefix = paste0(nameStem, dateString)
-  texFileName = paste0(fileNamePrefix,".tex")
+  texFileName = paste0(fileNamePrefix, ".tex")
 
   options(brew.extended.error = TRUE)
   options(show.error.messages = TRUE)
   
   e = new.env()
-  with(e,{reportParameterFileName=configFile})
-  a = brew::brew(file=templateFile, output=texFileName,envir=e)
+  with(e, {reportParameterFileName=configFile})
+  a = brew::brew(file=templateFile, output=texFileName, envir=e)
   if(exists("a")) 
   {
-    if(inherits(a,"try-error"))
+    if(inherits(a, "try-error"))
     {
       setwd(oldwkdir)
       signalCondition(a)
       return(NULL)
     }
   }
-  outputFile = xelatex(texFileName)
+  outputFile = tinytex::xelatex(texFileName)
   setwd(oldwkdir)
   return(outputFile)
 }

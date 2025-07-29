@@ -1,5 +1,6 @@
 #
-# posixxctCut - replace system cut.POSIXct to avoid broken round-tripping through factor/character/POSIXct when grouping by other than whoile hour/minuite etc.  
+# posixxctCut - replace system cut.POSIXct to avoid broken round-tripping through 
+#       factor/character/POSIXct when grouping by other than whoile hour/minuite etc.  
 #
 #     Copyright (C) 2025  Greg Hunt <greg@firmansyah.com>
 #

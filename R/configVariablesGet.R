@@ -17,17 +17,21 @@
 #     along with this program.  If not, see <https://www.gnu.org/licenses/>.
 #
 #
-#.configEnv <- new.env(parent=emptyenv())
 .configEnv <- new.env()
 
-configVariablesLoad<-function(fileName="report.config")
+configVariablesLoad <- function(fileName = "report.config")
 {
-	requiredNames = c("config.current.dataDir","config.current.dirNames","config.projectName","config.documentName","config.current.columnList")
-	optionalNames = c("config.readBaseline", "config.baseline.dataDir", "config.baseline.dirNames", "config.baseline.columnList", "config.generateGraphForTimeOver", 
-						"config.generateServerSessionStats", "config.generatePercentileRankings", "config.fix.data", "config.fix.current.data", "config.fix.baseline.data",
+  rm(list=ls("config.*", envir=.configEnv), envir = .configEnv, inherits = FALSE)
+	requiredNames = c("config.current.dataDir", "config.current.dirNames", "config.projectName", 
+					"config.documentName", "config.current.columnList")
+	optionalNames = c("config.readBaseline", "config.baseline.dataDir", "config.baseline.dirNames", 
+						"config.baseline.columnList", "config.generateGraphForTimeOver", 
+						"config.generateServerSessionStats", "config.generatePercentileRankings", 
+						"config.fix.data", "config.fix.current.data", "config.fix.baseline.data",
 						"config.generateTransactionDetails", "config.generateDiagnosticPlots", "config.workdir", "config.author",
-						"config.securityclass","config.useragent.generateFrequencies", "config.useragent.minimumPercentage", "config.useragent.maximumPercentile",
-						"config.useragent.discardOther", "config.longurls.threshold")
+						"config.securityClass", "config.useragent.generateFrequencies", 
+						"config.useragent.minimumPercentage", "config.useragent.maximumPercentile",
+						"config.useragent.discardOther", "config.longurls.threshold", "config.read.function")
 
 	fn = normalizePath(fileName)
 	configFileExists = file.exists(fn)
@@ -37,12 +41,12 @@ configVariablesLoad<-function(fileName="report.config")
 	}
 	else
 	{
-		sys.source(fileName,envir = .configEnv)
+		sys.source(fileName, envir = .configEnv)
 	}
 	
 	loadedNames = ls(envir=.configEnv)
 	foundNames = ls(envir=.configEnv)
-	items = setdiff(requiredNames,intersect(requiredNames,foundNames))
+	items = setdiff(requiredNames, intersect(requiredNames, foundNames))
 
 	if(length(items) > 0)
 	{
@@ -53,7 +57,7 @@ configVariablesLoad<-function(fileName="report.config")
 	items = setdiff(foundNames,union(requiredNames,optionalNames))
 	if(length(items) > 0)
 	{
-		warning("Configuration file contains unused variables ", toString(items))
+		warning("Configuration file", fileName, "contains unused variables ", toString(items))
 	}
 	
 	if(!is.element("config.generateGraphForTimeOver", loadedNames))
@@ -115,6 +119,10 @@ configVariablesLoad<-function(fileName="report.config")
 	{
 	  assign("config.longurls.threshold", 1000, envir = .configEnv)
 	}
+	if(!is.element("config.read.function", loadedNames))
+	{
+	  assign("config.read.function", "data.table", envir = .configEnv)
+	}
 	
 	if(configFileExists)
 	{
@@ -128,22 +136,22 @@ configVariablesLoad<-function(fileName="report.config")
 	}
 }
 
-configVariableGet<-function(name)
+configVariableGet <- function(name)
 {
   return(get(name,envir=.configEnv,inherits=FALSE))
 }
 
-configVariableSet<-function(name, value)
+configVariableSet <- function(name, value)
 {
   assign(name,value, envir=.configEnv,inherits=FALSE)
 }
 
-configVariableIs<-function(name)
+configVariableIs <- function(name)
 {
   return(exists(name,envir=.configEnv))
 }
 
-configVariablesAll<-function()
+configVariablesAll <- function()
 {
   return(ls(envir=.configEnv))
 }

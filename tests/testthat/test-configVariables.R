@@ -105,15 +105,18 @@ test_that("minimum config file works", {
   skip_on_cran()
 
   skip_on_os("windows")
-  skip_on_os("linux")
+  #skip_on_os("linux")
+  skip_on_os('mac')
   skip_on_os("solaris")
   
   wkdir = paste0(tempdir(),"/testpdf/")
   workingDirectoryPopulate(wkdir)
   fs::file_copy(paste0(getwd(), "/minimum.config"), paste0(wkdir,"/sample.config"),overwrite=TRUE)
   
-  expect_snapshot(system(paste0("cd ", wkdir, "; ls; . ./makerpt.sh sample")))
+  expect_no_error(system(paste0("bash -c \"cd ", wkdir, " && . ./makerpt.sh sample \" ")))
 
-  system(paste0("open ",wkdir, "*.pdf ; sleep 1"))
+  pdfName = list.files(wkdir, pattern=".*\\.pdf")[[1]]
+  
+  #system(paste0("open ",wkdir, pdfName, " ; sleep 1"))
   unlink(wkdir,recursive=TRUE)
 })

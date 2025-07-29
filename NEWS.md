@@ -1,5 +1,17 @@
 # *News*
 
+# WebAnalytics 0.9.14 (2025-07-23)
+
+* New: added switch to replace use of data.table with read,table since data,table is (July 2025) unstable with large datasets
+* New: made data.table suggested rather than required
+* New: made tinytex suggsted rather than imported due to its tendency to tread on other, system-level, tex installations
+
+# WebAnalytics 0.9.13 (2025-07-22)
+
+* Bug: Fixes for long URL wrapping in LaTex with more random characters in URLs, created a test case to exxercise that (take an hour or so to run)
+* Bug: Removed cut from the code and replaced with with bespoke/application-specific cut because the as.character.POSIXctused to get back from cut's factor 
+output to time (used for intervals that are not able to be accommodated by round()) runs the complete conversion repeatedly until it finds a format that works for all values and as.POSIXct.character does not format all values the same way this results in different data item conversions depending on the content of the whole list, not just the values of the individsual elements.  Feeding cut factor outout through as.character and then as.POSIXct unpredictably gives different results depending on whether or not a data point at exactly midnight is present.  The iterative search cut makes for a format also re-processes the entire list repeatedly, in the case that surfavced this behaviour this resulted in roughly 20 million string conversions for a four million elkement list before settling on the wrong format.  
+
 # WebAnalytics 0.9.9 (2023-10-04)
 
 Package level documentation page missing - re-added.  Corrected notes that are being generated for documentation.

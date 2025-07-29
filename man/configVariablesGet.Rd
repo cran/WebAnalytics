@@ -211,6 +211,14 @@ The length in characters of a URL above which the URL text is replaced by a plac
 \item Default Value: 1000
 }
 }
+\item{\code{config.read.function}}{
+Selects the function used to read the log file.  The default is data.table::fread, but data.table::fread is known (July 2025) to crash with large data files.    
+\itemize{
+\item Optional
+\item Default Value: data.table 
+\item Value to select core R \code{read.table}: core 
+}
+}
 }
 }
 \value{
